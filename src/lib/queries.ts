@@ -419,6 +419,7 @@ export async function fetchSlotDetail(slot: number): Promise<SlotDetail> {
     total_fee_lamports: number;
     first_shred_time: string | null;
     prev_slot_first_shred_time: string | null;
+    last_shred_time: string | null;
   }[];
 
   const entriesRows = entriesResult as {

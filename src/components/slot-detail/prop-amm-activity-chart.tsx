@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { SlotTransaction } from "@/lib/types";
 import { PROP_AMM_ACCOUNTS } from "@/lib/prop-amm";
 
@@ -15,9 +15,11 @@ type Props = {
   showLegend?: boolean;
   slotNumber?: number;
   validatorIdentity?: string;
+  validatorName?: string | null;
+  validatorClient?: string | null;
 };
 
-const COLOR_PALETTE = [
+const DEFAULT_COLORS = [
   "#38bdf8",
   "#f472b6",
   "#facc15",
@@ -28,6 +30,34 @@ const COLOR_PALETTE = [
   "#c084fc"
 ];
 
+const SCHEDULER_COLORS: Record<string, string> = {
+  "AgaveBam": "#7C3AED",
+  "Agave": "#2C3316",
+  "JitoLabs": "#5F288D",
+  "Frankendancer": "#fb923c",
+  "Firedancer": "#ef4444",
+  "AgavePaladin": "#facc15",
+  "Harmonic": "#F5F2EB",
+  "Unknown": "#64748b",
+};
+
+function getClientDisplayName(softwareClient: string): string {
+  if (softwareClient === "JitoLabs") return "Jito Agave";
+  if (softwareClient === "AgaveBam") return "BAM";
+  return softwareClient;
+}
+
+function getClientColor(softwareClient: string): string {
+  return SCHEDULER_COLORS[softwareClient] ?? "#64748b";
+}
+
+type TrackedAccount = {
+  account: string;
+  label: string;
+  color: string;
+  isDefault: boolean;
+};
+
 export default function PropAmmActivityChart({
   transactions,
   width,
@@ -36,24 +66,106 @@ export default function PropAmmActivityChart({
   title,
   subtitle,
   hideHeader = false,
-  showLegend = true,
   slotNumber,
-  validatorIdentity
+  validatorIdentity,
+  validatorName,
+  validatorClient
 }: Props) {
+  const [trackedAccounts, setTrackedAccounts] = useState<TrackedAccount[]>(() =>
+    PROP_AMM_ACCOUNTS.map((a, idx) => ({
+      account: a.account,
+      label: a.label,
+      color: DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
+      isDefault: true
+    }))
+  );
+  const [newAddress, setNewAddress] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [newColor, setNewColor] = useState("#34d399");
+
   const propTransactions = useMemo(
-    () => transactions.filter((t) => !!t.propAmmAccount && !t.isVote),
-    [transactions]
+    () => {
+      const accountSet = new Set(trackedAccounts.map((a) => a.account));
+      return transactions.filter((t) => {
+        if (t.isVote) return false;
+        if (t.propAmmAccount && accountSet.has(t.propAmmAccount)) return true;
+        const txAccounts = [
+          ...(t.staticSignedWritableAccounts ?? []),
+          ...(t.staticSignedReadonlyAccounts ?? []),
+          ...(t.staticUnsignedWritableAccounts ?? []),
+          ...(t.staticUnsignedReadonlyAccounts ?? [])
+        ];
+        return txAccounts.some((addr) => accountSet.has(addr));
+      });
+    },
+    [transactions, trackedAccounts]
   );
 
   const accountLines = useMemo(() => {
-    const count = PROP_AMM_ACCOUNTS.length || 1;
+    const count = trackedAccounts.length || 1;
     const pointSpacing = 1 / (count + 1);
-    return PROP_AMM_ACCOUNTS.map((acct, idx) => ({
+    return trackedAccounts.map((acct, idx) => ({
       ...acct,
-      yFraction: pointSpacing * (idx + 1),
-      color: COLOR_PALETTE[idx % COLOR_PALETTE.length]
+      yFraction: pointSpacing * (idx + 1)
     }));
-  }, []);
+  }, [trackedAccounts]);
+
+  const handleAddAccount = () => {
+    const address = newAddress.trim();
+    const label = newLabel.trim() || `Custom ${trackedAccounts.filter((a) => !a.isDefault).length + 1}`;
+
+    if (!address) return;
+    if (trackedAccounts.some((a) => a.account === address)) return;
+
+    setTrackedAccounts((prev) => [...prev, { account: address, label, color: newColor, isDefault: false }]);
+    setNewAddress("");
+    setNewLabel("");
+    setNewColor(DEFAULT_COLORS[(trackedAccounts.length + 1) % DEFAULT_COLORS.length]);
+  };
+
+  const handleRemoveAccount = (address: string) => {
+    setTrackedAccounts((prev) => prev.filter((a) => a.account !== address));
+  };
+
+  const handleColorChange = (address: string, color: string) => {
+    setTrackedAccounts((prev) =>
+      prev.map((a) => (a.account === address ? { ...a, color } : a))
+    );
+  };
+
+  const handleLabelChange = (address: string, label: string) => {
+    setTrackedAccounts((prev) =>
+      prev.map((a) => (a.account === address ? { ...a, label } : a))
+    );
+  };
+
+  // Find most common accounts not already tracked
+  const suggestedAccounts = useMemo(() => {
+    const trackedSet = new Set(trackedAccounts.map((a) => a.account));
+    const accountCounts = new Map<string, number>();
+
+    // Count occurrences of each account across all non-vote transactions
+    for (const tx of transactions) {
+      if (tx.isVote) continue;
+      const allAccounts = [
+        ...(tx.staticSignedWritableAccounts ?? []),
+        ...(tx.staticSignedReadonlyAccounts ?? []),
+        ...(tx.staticUnsignedWritableAccounts ?? []),
+        ...(tx.staticUnsignedReadonlyAccounts ?? [])
+      ];
+      for (const addr of allAccounts) {
+        if (!trackedSet.has(addr)) {
+          accountCounts.set(addr, (accountCounts.get(addr) || 0) + 1);
+        }
+      }
+    }
+
+    // Sort by count and return top suggestions
+    return Array.from(accountCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([account, count]) => ({ account, count }));
+  }, [transactions, trackedAccounts]);
 
   const tickValues = useMemo(() => {
     const ticks = propTransactions
@@ -94,20 +206,141 @@ export default function PropAmmActivityChart({
   }
 
   const headerTitle = title ?? "Prop AMM Sequencing";
-  const headerSubtitle =
+  const headerSubtitleBase =
     subtitle ??
     `PoH ticks with compute-weighted arrivals per prop AMM signer (max tick #${tickValues})${
       slotNumber ? ` • Slot ${slotNumber.toLocaleString()}` : ""
-    }${validatorIdentity ? ` • Validator ${validatorIdentity}` : ""}`;
+    }${validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}`;
 
   return (
     <div className={`overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-6 ${containerClassName ?? ""}`}>
       {!hideHeader && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold">{headerTitle}</h3>
-          <p className="text-sm text-slate-400">{headerSubtitle}</p>
+          <p className="text-sm text-slate-400">
+            {headerSubtitleBase}
+            {validatorClient && (
+              <>
+                {" • "}
+                <span style={{ color: getClientColor(validatorClient) }}>{getClientDisplayName(validatorClient)}</span>
+              </>
+            )}
+          </p>
         </div>
       )}
+
+      {/* Tracked Accounts Table */}
+      <div className="mb-6 overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-800/80 text-xs text-slate-400">
+            <tr>
+              <th className="px-3 py-2 text-left">Color</th>
+              <th className="px-3 py-2 text-left">Label</th>
+              <th className="px-3 py-2 text-left">Account</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trackedAccounts.map((acct) => (
+              <tr key={acct.account} className="border-t border-slate-700">
+                <td className="px-3 py-2">
+                  <input
+                    type="color"
+                    value={acct.color}
+                    onChange={(e) => handleColorChange(acct.account, e.target.value)}
+                    className="h-6 w-8 cursor-pointer rounded border border-slate-600 bg-transparent"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={acct.label}
+                    onChange={(e) => handleLabelChange(acct.account, e.target.value)}
+                    className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 text-sm text-slate-200 focus:border-sky-500 focus:outline-none"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <code className="text-xs text-slate-400">
+                    {acct.account.slice(0, 8)}...{acct.account.slice(-8)}
+                  </code>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <button
+                    onClick={() => handleRemoveAccount(acct.account)}
+                    className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-red-400"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {/* Add new account row */}
+            <tr className="border-t border-slate-700 bg-slate-800/30">
+              <td className="px-3 py-2">
+                <input
+                  type="color"
+                  value={newColor}
+                  onChange={(e) => setNewColor(e.target.value)}
+                  className="h-6 w-8 cursor-pointer rounded border border-slate-600 bg-transparent"
+                />
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="text"
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Label (optional)"
+                  className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="text"
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  placeholder="Account address..."
+                  className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+              </td>
+              <td className="px-3 py-2 text-right">
+                <button
+                  onClick={handleAddAccount}
+                  disabled={!newAddress.trim()}
+                  className="rounded bg-sky-600 px-3 py-1 text-xs text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Add
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Quick suggestions */}
+        {suggestedAccounts.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-xs">
+            <span className="text-slate-500">Quick add:</span>
+            {suggestedAccounts.slice(0, 3).map((s) => (
+              <button
+                key={s.account}
+                onClick={() => {
+                  setTrackedAccounts((prev) => [
+                    ...prev,
+                    {
+                      account: s.account,
+                      label: `Account ${prev.filter((a) => !a.isDefault).length + 1}`,
+                      color: DEFAULT_COLORS[(prev.length) % DEFAULT_COLORS.length],
+                      isDefault: false
+                    }
+                  ]);
+                }}
+                className="rounded border border-slate-600 bg-slate-800 px-2 py-1 font-mono text-slate-400 hover:border-sky-500 hover:text-sky-400"
+              >
+                {s.account.slice(0, 4)}...{s.account.slice(-4)} <span className="text-slate-600">({s.count})</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <svg width={chartWidth} height={chartHeight} className="mx-auto block overflow-visible">
         <g transform={`translate(${padding.left}, ${padding.top})`}>
@@ -140,8 +373,24 @@ export default function PropAmmActivityChart({
 
           {/* dots */}
           {propTransactions.map((tx) => {
-            if (!tx.propAmmAccount || typeof tx.pohTickNumber !== "number") return null;
-            const acct = accountLines.find((a) => a.account === tx.propAmmAccount);
+            if (typeof tx.pohTickNumber !== "number") return null;
+
+            // Find matching account - either from propAmmAccount or from transaction accounts
+            let acct = tx.propAmmAccount
+              ? accountLines.find((a) => a.account === tx.propAmmAccount)
+              : null;
+
+            // If no propAmmAccount match, check transaction accounts for custom accounts
+            if (!acct) {
+              const txAccounts = [
+                ...(tx.staticSignedWritableAccounts ?? []),
+                ...(tx.staticSignedReadonlyAccounts ?? []),
+                ...(tx.staticUnsignedWritableAccounts ?? []),
+                ...(tx.staticUnsignedReadonlyAccounts ?? [])
+              ];
+              acct = accountLines.find((a) => txAccounts.includes(a.account));
+            }
+
             if (!acct) return null;
             const tick = tx.pohTickNumber + 1;
             const x = xForTick(tick);
@@ -205,19 +454,8 @@ export default function PropAmmActivityChart({
 
       {propTransactions.length === 0 && (
         <p className="mt-4 text-center text-sm text-slate-400">
-          No prop AMM transactions landed in this slot.
+          No matching transactions landed in this slot.
         </p>
-      )}
-
-      {showLegend && (
-        <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-400">
-          {accountLines.map((acct) => (
-            <div key={`legend-${acct.account}`} className="flex items-center gap-2">
-              <span className="inline-block h-2 w-4 rounded-sm" style={{ backgroundColor: acct.color }} />
-              {acct.label}
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );

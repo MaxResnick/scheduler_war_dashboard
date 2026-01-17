@@ -1,48 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import cachedValidatorData from "../../data/validator-names.json";
+
+// Type for cached data
+type CachedValidatorNames = {
+  generatedAt: string;
+  count: number;
+  names: Record<string, string>;
+};
+
+const validatorNamesData = cachedValidatorData as CachedValidatorNames;
 
 type SlotSearchProps = {
   currentSlot?: number;
 };
 
+type ValidatorSuggestion = {
+  address: string;
+  name: string | null;
+};
+
 export default function SlotSearch({ currentSlot }: SlotSearchProps) {
-  const [mode, setMode] = useState<"slot" | "validator">("slot");
   const [inputValue, setInputValue] = useState(currentSlot?.toString() ?? "");
-  const [validatorResults, setValidatorResults] = useState<
-    Array<{ slot: number; block_height: number; total_fee_lamports: number }>
-  >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuggesting, setIsSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mode === "slot") {
-      const slot = parseInt(inputValue, 10);
-      if (!isNaN(slot) && slot > 0) {
-        router.push(`/slot/${slot}`);
+  // Check if input looks like a slot number
+  const isSlotNumber = /^\d+$/.test(inputValue.trim());
+
+  // Search validators locally from cached data
+  const suggestions = useMemo((): ValidatorSuggestion[] => {
+    const q = inputValue.trim().toLowerCase();
+
+    // Don't search if it's a slot number or too short
+    if (isSlotNumber || q.length < 2) {
+      return [];
+    }
+
+    const results: ValidatorSuggestion[] = [];
+
+    for (const [account, name] of Object.entries(validatorNamesData.names)) {
+      const nameMatches = name.toLowerCase().includes(q);
+      const accountMatches = account.toLowerCase().startsWith(q);
+
+      if (nameMatches || accountMatches) {
+        results.push({ address: account, name });
+        if (results.length >= 10) {
+          break;
+        }
       }
-      return;
     }
 
-    const validator = inputValue.trim();
-    const VALIDATOR_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,64}$/;
-    if (!VALIDATOR_REGEX.test(validator)) {
-      setError("Enter a valid validator address.");
-      setValidatorResults([]);
-      return;
-    }
+    return results;
+  }, [inputValue, isSlotNumber]);
 
-    setError(null);
+  // Reset highlighted index when suggestions change
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [suggestions.length]);
+
+  const navigateToSlot = (slot: number) => {
+    router.push(`/slot/${slot}`);
+  };
+
+  const navigateToValidator = (address: string) => {
     setIsLoading(true);
-    setHasSearched(true);
-    setSuggestions([]);
-    fetch(`/api/validator-slots/${validator}`)
+    setError(null);
+    setShowDropdown(false);
+
+    fetch(`/api/validator-slots/${address}`)
       .then(async (res) => {
         if (!res.ok) {
           const { error: message } = await res.json();
@@ -51,169 +82,140 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
         return res.json();
       })
       .then((data) => {
-        const unique = new Map<number, { slot: number; block_height: number; total_fee_lamports: number }>();
-        for (const item of data.slots ?? []) {
-          if (!unique.has(item.slot)) {
-            unique.set(item.slot, item);
-          }
+        const slots = data.slots ?? [];
+        if (slots.length > 0) {
+          router.push(`/slot/${slots[0].slot}`);
+        } else {
+          setError("No recent slots found for this validator.");
         }
-        setValidatorResults(Array.from(unique.values()));
       })
       .catch((err) => {
-        setValidatorResults([]);
         setError(err instanceof Error ? err.message : "Request failed");
       })
       .finally(() => setIsLoading(false));
   };
 
-  const handleModeChange = (nextMode: "slot" | "validator") => {
-    setMode(nextMode);
-    setError(null);
-    setValidatorResults([]);
-    setHasSearched(false);
-    setSuggestions([]);
-    if (nextMode === "slot") {
-      setInputValue(currentSlot?.toString() ?? "");
-    } else {
-      setInputValue("");
-    }
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = inputValue.trim();
 
-  useEffect(() => {
-    if (mode !== "validator") return;
+    if (!value) return;
 
-    const q = inputValue.trim();
-    if (q.length < 2) {
-      setSuggestions([]);
+    // If it's a slot number, navigate directly
+    if (isSlotNumber) {
+      const slot = parseInt(value, 10);
+      if (slot > 0) {
+        navigateToSlot(slot);
+      }
       return;
     }
 
-    const controller = new AbortController();
-    setIsSuggesting(true);
-    fetch(`/api/validator-search?q=${encodeURIComponent(q)}`, {
-      signal: controller.signal
-    })
-      .then((res) => (res.ok ? res.json() : { validators: [] }))
-      .then((data) => {
-        if (data.validators) {
-          setSuggestions(data.validators.slice(0, 10));
-        } else {
-          setSuggestions([]);
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setSuggestions([]);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setIsSuggesting(false);
-        }
-      });
+    // If there's a highlighted suggestion, use it
+    if (suggestions.length > 0 && suggestions[highlightedIndex]) {
+      navigateToValidator(suggestions[highlightedIndex].address);
+      return;
+    }
 
-    return () => controller.abort();
-  }, [inputValue, mode]);
+    // If it looks like a validator address, try to navigate
+    const VALIDATOR_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,64}$/;
+    if (VALIDATOR_REGEX.test(value)) {
+      navigateToValidator(value);
+    } else {
+      setError("Enter a slot number or validator name/address");
+    }
+  };
 
-  const handleSuggestionSelect = (value: string) => {
-    setInputValue(value);
-    setSuggestions([]);
-    setError(null);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown" || e.key === "Tab") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev > 0 ? prev - 1 : suggestions.length - 1
+      );
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: ValidatorSuggestion) => {
+    setShowDropdown(false);
+    navigateToValidator(suggestion.address);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => handleModeChange("slot")}
-          className={`rounded-md px-3 py-1 text-xs font-medium uppercase tracking-wide transition ${
-            mode === "slot"
-              ? "bg-sky-600 text-white"
-              : "border border-slate-700 bg-slate-900/60 text-slate-300 hover:border-sky-500"
-          }`}
-        >
-          Slot
-        </button>
-        <button
-          type="button"
-          onClick={() => handleModeChange("validator")}
-          className={`rounded-md px-3 py-1 text-xs font-medium uppercase tracking-wide transition ${
-            mode === "validator"
-              ? "bg-sky-600 text-white"
-              : "border border-slate-700 bg-slate-900/60 text-slate-300 hover:border-sky-500"
-          }`}
-        >
-          Validator
-        </button>
-      </div>
-
+    <div className="space-y-3">
       <div className="relative">
-        <form onSubmit={handleSearch} className="flex gap-3">
+        <form onSubmit={handleSubmit} className="flex gap-3">
           <input
             type="text"
-            placeholder={
-              mode === "slot" ? "Enter slot number..." : "Enter validator address..."
-            }
+            placeholder="Search slot number or validator name..."
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setError(null);
+              setShowDropdown(true);
+            }}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => {
+              // Delay to allow click on dropdown item
+              setTimeout(() => setShowDropdown(false), 200);
+            }}
             className="flex-1 rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
           <button
             type="submit"
-            className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            disabled={isLoading}
+            className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50"
           >
-            Search
+            {isLoading ? "Loading..." : "Go"}
           </button>
         </form>
 
-        {mode === "validator" && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 z-10 mt-1 max-h-56 overflow-auto rounded-lg border border-slate-700 bg-slate-900/95 py-2 text-sm shadow-lg">
-            {suggestions.map((suggestion) => (
+        {/* Dropdown suggestions */}
+        {showDropdown && suggestions.length > 0 && (
+          <div className="absolute left-0 right-[80px] z-10 mt-1 max-h-64 overflow-auto rounded-lg border border-slate-700 bg-slate-900/95 py-2 text-sm shadow-lg">
+            {suggestions.map((suggestion, index) => (
               <button
-                key={suggestion}
+                key={suggestion.address}
                 type="button"
-                onClick={() => handleSuggestionSelect(suggestion)}
-                className="w-full px-4 py-2 text-left text-slate-200 hover:bg-slate-800"
+                onClick={() => handleSuggestionClick(suggestion)}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                className={`w-full px-4 py-2 text-left ${
+                  index === highlightedIndex ? "bg-slate-700" : "hover:bg-slate-800"
+                }`}
               >
-                {suggestion}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    {suggestion.name ? (
+                      <>
+                        <span className="font-medium text-slate-200">{suggestion.name}</span>
+                        <span className="text-xs text-slate-400 font-mono">
+                          {suggestion.address.slice(0, 8)}...{suggestion.address.slice(-8)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-slate-200 font-mono">
+                        {suggestion.address.slice(0, 8)}...{suggestion.address.slice(-8)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </button>
             ))}
-            {isSuggesting && (
-              <div className="px-4 py-2 text-xs text-slate-400">Loading…</div>
-            )}
           </div>
         )}
       </div>
 
-      {mode === "validator" && (
-        <div className="space-y-3">
-          {isLoading && <p className="text-xs text-slate-400">Loading slots…</p>}
-          {error && <p className="text-xs text-red-400">{error}</p>}
-          {validatorResults.length > 0 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {validatorResults.map((item) => (
-                <button
-                  key={item.slot}
-                  onClick={() => router.push(`/slot/${item.slot}`)}
-                  className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-left transition hover:border-sky-500 hover:bg-slate-900/80"
-                >
-                  <div className="text-sm font-semibold text-slate-200">Slot {item.slot}</div>
-                  <div className="text-xs text-slate-400">
-                    Block height: {item.block_height.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    Total fees: {(item.total_fee_lamports / 1_000_000_000).toFixed(4)} SOL
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-          {!isLoading && !error && hasSearched && validatorResults.length === 0 && (
-            <p className="text-xs text-slate-400">No slots found for this validator.</p>
-          )}
-        </div>
-      )}
+      {/* Status messages */}
+      {isLoading && <p className="text-xs text-slate-400">Finding most recent slot...</p>}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

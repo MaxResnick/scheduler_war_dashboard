@@ -8,6 +8,8 @@ type TransactionSequencingChartProps = {
   transactions: SlotTransaction[];
   slotNumber?: number;
   validatorIdentity?: string;
+  validatorName?: string | null;
+  validatorClient?: string | null;
 };
 
 type CumulativeData = {
@@ -17,11 +19,34 @@ type CumulativeData = {
   cumulativeRegular: number;
 };
 
+const SCHEDULER_COLORS: Record<string, string> = {
+  "AgaveBam": "#7C3AED",
+  "Agave": "#2C3316",
+  "JitoLabs": "#5F288D",
+  "Frankendancer": "#fb923c",
+  "Firedancer": "#ef4444",
+  "AgavePaladin": "#facc15",
+  "Harmonic": "#F5F2EB",
+  "Unknown": "#64748b",
+};
+
+function getClientDisplayName(softwareClient: string): string {
+  if (softwareClient === "JitoLabs") return "Jito Agave";
+  if (softwareClient === "AgaveBam") return "BAM";
+  return softwareClient;
+}
+
+function getClientColor(softwareClient: string): string {
+  return SCHEDULER_COLORS[softwareClient] ?? "#64748b";
+}
+
 export default function TransactionSequencingChart({
   entries,
   transactions,
   slotNumber,
-  validatorIdentity
+  validatorIdentity,
+  validatorName,
+  validatorClient
 }: TransactionSequencingChartProps) {
   const chartWidth = 1200;
   const chartHeight = 500;
@@ -83,7 +108,13 @@ export default function TransactionSequencingChart({
         <p className="text-sm text-slate-400">
           Cumulative by PoH tick (#{maxTickValue})
           {slotNumber ? ` • Slot ${slotNumber.toLocaleString()}` : ""}
-          {validatorIdentity ? ` • Validator ${validatorIdentity}` : ""}
+          {validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}
+          {validatorClient && (
+            <>
+              {" • "}
+              <span style={{ color: getClientColor(validatorClient) }}>{getClientDisplayName(validatorClient)}</span>
+            </>
+          )}
         </p>
       </div>
 

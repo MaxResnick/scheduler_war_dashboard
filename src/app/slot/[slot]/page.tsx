@@ -1,14 +1,36 @@
 import { fetchSlotDetail } from "@/lib/queries";
+import type { SlotDetail } from "@/lib/types";
+import { getValidatorName, getAllValidators } from "@/lib/validators-app";
 import SlotSearch from "@/components/slot-detail/slot-search";
 import TransactionSequencingChart from "@/components/slot-detail/transaction-sequencing-chart";
 import TransactionSequencingTimeline from "@/components/slot-detail/transaction-sequencing-timeline";
 import TransactionProportionalBars from "@/components/slot-detail/transaction-proportional-bars";
 import PropAmmActivityChart from "@/components/slot-detail/prop-amm-activity-chart";
-import PropAmmTransactionsTable from "@/components/slot-detail/prop-amm-transactions-table";
 
 type SlotPageProps = {
   params: { slot: string };
 };
+
+const SCHEDULER_COLORS: Record<string, string> = {
+  "AgaveBam": "#7C3AED",
+  "Agave": "#2C3316",
+  "JitoLabs": "#5F288D",
+  "Frankendancer": "#fb923c",
+  "Firedancer": "#ef4444",
+  "AgavePaladin": "#facc15",
+  "Harmonic": "#F5F2EB",
+  "Unknown": "#64748b",
+};
+
+function getClientDisplayName(softwareClient: string): string {
+  if (softwareClient === "JitoLabs") return "Jito Agave";
+  if (softwareClient === "AgaveBam") return "BAM";
+  return softwareClient;
+}
+
+function getClientColor(softwareClient: string): string {
+  return SCHEDULER_COLORS[softwareClient] ?? "#64748b";
+}
 
 export default async function SlotPage({ params }: SlotPageProps) {
   const slot = parseInt(params.slot, 10);
@@ -27,9 +49,16 @@ export default async function SlotPage({ params }: SlotPageProps) {
     );
   }
 
-  let slotData;
+  let slotData: SlotDetail;
+  let leaderValidatorName: string | null = null;
+  let leaderValidatorClient: string | null = null;
   try {
     slotData = await fetchSlotDetail(slot);
+    // Get validator name and client from cached data
+    leaderValidatorName = getValidatorName(slotData.metadata.leaderValidator);
+    const allValidators = getAllValidators();
+    const leaderValidator = allValidators.find(v => v.account === slotData.metadata.leaderValidator);
+    leaderValidatorClient = leaderValidator?.softwareClient ?? null;
   } catch (error) {
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
@@ -71,6 +100,9 @@ export default async function SlotPage({ params }: SlotPageProps) {
   );
   const toSol = (lamports: number) => (lamports / 1_000_000_000).toFixed(4);
 
+  // Transition slot is the first slot of each 4-slot leader window
+  const isTransitionSlot = slot % 4 === 0;
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       <header className="space-y-2">
@@ -83,12 +115,41 @@ export default async function SlotPage({ params }: SlotPageProps) {
           </div>
           <div className="text-right">
             <div className="text-xs text-slate-400">Leader Validator</div>
-            <div className="mt-1 max-w-[420px] truncate font-mono text-sm text-slate-200">
+            {leaderValidatorName && (
+              <div className="mt-1 text-sm font-medium text-sky-400">
+                {leaderValidatorName}
+              </div>
+            )}
+            <div className={`${leaderValidatorName ? 'mt-0.5' : 'mt-1'} max-w-[420px] truncate font-mono text-xs text-slate-400`}>
               {metadata.leaderValidator}
             </div>
+            {leaderValidatorClient && (
+              <div className="mt-1 flex items-center justify-end gap-2">
+                <div
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: getClientColor(leaderValidatorClient) }}
+                />
+                <span className="text-xs font-medium" style={{ color: getClientColor(leaderValidatorClient) }}>
+                  {getClientDisplayName(leaderValidatorClient)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </header>
+
+      {isTransitionSlot && (
+        <div className="rounded-lg border border-amber-600/50 bg-amber-900/20 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400">⚠</span>
+            <span className="text-sm font-medium text-amber-300">Transition Slot</span>
+          </div>
+          <p className="mt-1 text-xs text-amber-200/80">
+            This is the first slot of a 4-slot leader window. Slot time measurements may include
+            cross-validator timing variance and should be interpreted with caution.
+          </p>
+        </div>
+      )}
 
       <SlotSearch currentSlot={slot} />
 
@@ -122,72 +183,32 @@ export default async function SlotPage({ params }: SlotPageProps) {
         transactions={transactions}
         slotNumber={slot}
         validatorIdentity={metadata.leaderValidator}
+        validatorName={leaderValidatorName}
+        validatorClient={leaderValidatorClient}
       />
       <TransactionSequencingTimeline
         entries={entries}
         transactions={transactions}
         slotNumber={slot}
         validatorIdentity={metadata.leaderValidator}
+        validatorName={leaderValidatorName}
+        validatorClient={leaderValidatorClient}
       />
       <TransactionSequencingChart
         entries={entries}
         transactions={transactions}
         slotNumber={slot}
         validatorIdentity={metadata.leaderValidator}
+        validatorName={leaderValidatorName}
+        validatorClient={leaderValidatorClient}
       />
       <PropAmmActivityChart
         transactions={transactions}
         slotNumber={slot}
+        validatorName={leaderValidatorName}
         validatorIdentity={metadata.leaderValidator}
+        validatorClient={leaderValidatorClient}
       />
-      <PropAmmTransactionsTable transactions={transactions} />
-
-      {/* Debug sections removed: bundles, entries, block metadata */}
-
-      {/* Transactions (merged) */}
-      <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Transactions</h3>
-          <div className="text-xs text-slate-400">
-            Count: {transactions.length.toLocaleString()}
-          </div>
-        </div>
-        <div className="max-h-[28rem] overflow-auto rounded">
-          <table className="w-full text-left text-xs">
-            <thead className="sticky top-0 bg-slate-900/70 text-slate-400">
-              <tr>
-                <th className="px-2 py-1">Idx</th>
-                <th className="px-2 py-1">Signature</th>
-                <th className="px-2 py-1">Type</th>
-                <th className="px-2 py-1">CU Used</th>
-                <th className="px-2 py-1">CU Requested</th>
-                <th className="px-2 py-1">Allocated Tip</th>
-                <th className="px-2 py-1">Fee</th>
-                <th className="px-2 py-1">PoH Tick #</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((t) => (
-                <tr key={`${t.signature}-${t.index}`} className="border-t border-slate-800 text-slate-200">
-                  <td className="px-2 py-1 font-mono">{t.index}</td>
-                  <td className="px-2 py-1 font-mono">
-                    {t.signature.slice(0, 8)}…{t.signature.slice(-8)}
-                  </td>
-                  <td className="px-2 py-1">
-                    {t.isVote ? "Vote" : t.isJitoBundle ? "Jito" : "TPU"}
-                  </td>
-                  <td className="px-2 py-1">{t.computeUnitsConsumed?.toLocaleString() ?? "—"}</td>
-                  <td className="px-2 py-1">{t.computeUnitsRequested?.toLocaleString() ?? "—"}</td>
-                  <td className="px-2 py-1">{(t.allocatedTipLamports ?? 0).toLocaleString()}</td>
-                  <td className="px-2 py-1">{(t.feeLamports ?? 0).toLocaleString()}</td>
-                  <td className="px-2 py-1">{typeof t.pohTickNumber === 'number' ? t.pohTickNumber + 1 : "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">

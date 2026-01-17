@@ -8,9 +8,32 @@ type Props = {
   transactions: SlotTransaction[];
   slotNumber?: number;
   validatorIdentity?: string;
+  validatorName?: string | null;
+  validatorClient?: string | null;
 };
 
 type TxPoint = { tick: number };
+
+const SCHEDULER_COLORS: Record<string, string> = {
+  "AgaveBam": "#7C3AED",
+  "Agave": "#2C3316",
+  "JitoLabs": "#5F288D",
+  "Frankendancer": "#fb923c",
+  "Firedancer": "#ef4444",
+  "AgavePaladin": "#facc15",
+  "Harmonic": "#F5F2EB",
+  "Unknown": "#64748b",
+};
+
+function getClientDisplayName(softwareClient: string): string {
+  if (softwareClient === "JitoLabs") return "Jito Agave";
+  if (softwareClient === "AgaveBam") return "BAM";
+  return softwareClient;
+}
+
+function getClientColor(softwareClient: string): string {
+  return SCHEDULER_COLORS[softwareClient] ?? "#64748b";
+}
 
 function buildEntryBoundaries(entries: SlotEntry[]) {
   let cumulativeTx = 0;
@@ -58,7 +81,9 @@ export default function TransactionSequencingTimeline({
   entries,
   transactions,
   slotNumber,
-  validatorIdentity
+  validatorIdentity,
+  validatorName,
+  validatorClient
 }: Props) {
   const boundaries = useMemo(() => buildEntryBoundaries(entries), [entries]);
 
@@ -118,7 +143,13 @@ export default function TransactionSequencingTimeline({
         <p className="text-xs text-slate-400">
           PoH tick across the slot
           {slotNumber ? ` • Slot ${slotNumber.toLocaleString()}` : ""}
-          {validatorIdentity ? ` • Validator ${validatorIdentity}` : ""}
+          {validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}
+          {validatorClient && (
+            <>
+              {" • "}
+              <span style={{ color: getClientColor(validatorClient) }}>{getClientDisplayName(validatorClient)}</span>
+            </>
+          )}
         </p>
       </div>
 

@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npx tsx scripts/fetch-validator-names.ts && npx tsx scripts/fetch-bam-validators.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fetch-validators": "npx tsx scripts/fetch-validator-names.ts",
+    "fetch-bam-validators": "npx tsx scripts/fetch-bam-validators.ts"
   },
   "dependencies": {
     "clickhouse": "^2.6.0",
