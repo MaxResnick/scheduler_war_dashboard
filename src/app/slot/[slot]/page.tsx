@@ -55,8 +55,11 @@ export default async function SlotPage({ params }: SlotPageProps) {
   try {
     slotData = await fetchSlotDetail(slot);
     // Get validator name and client from cached data
-    leaderValidatorName = getValidatorName(slotData.metadata.leaderValidator);
-    const allValidators = getAllValidators();
+    const [name, allValidators] = await Promise.all([
+      getValidatorName(slotData.metadata.leaderValidator),
+      getAllValidators(),
+    ]);
+    leaderValidatorName = name;
     const leaderValidator = allValidators.find(v => v.account === slotData.metadata.leaderValidator);
     leaderValidatorClient = leaderValidator?.softwareClient ?? null;
   } catch (error) {

@@ -2,8 +2,8 @@ import SchedulerTreemap from "@/components/scheduler-treemap";
 import { getAllValidators } from "@/lib/validators-app";
 import Link from "next/link";
 
-export default function HomePage() {
-  const validators = getAllValidators();
+export default async function HomePage() {
+  const validators = await getAllValidators();
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">

@@ -52,11 +52,13 @@ async function fetchValidatorSlots() {
 }
 
 export default async function SlotLaggingPage() {
-  const validators = await fetchValidatorSlots();
-  const validatorNames = getAllValidatorNames();
+  const [validators, validatorNames, allValidators] = await Promise.all([
+    fetchValidatorSlots(),
+    getAllValidatorNames(),
+    getAllValidators(),
+  ]);
 
   // Build a map of validator address -> softwareClient for coloring
-  const allValidators = getAllValidators();
   const validatorClients: Record<string, string> = {};
   for (const v of allValidators) {
     validatorClients[v.account] = v.softwareClient;

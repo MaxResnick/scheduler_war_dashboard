@@ -18,13 +18,13 @@ export async function GET(request: Request) {
   try {
     // Return all cached names for client-side use
     if (allParam === "true") {
-      const allNames = getAllValidatorNames();
+      const allNames = await getAllValidatorNames();
       return NextResponse.json({ names: allNames });
     }
 
     // Search by name or address
     if (searchQuery) {
-      const results = searchValidators(searchQuery, 20);
+      const results = await searchValidators(searchQuery, 20);
       return NextResponse.json({ validators: results });
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ names: {} });
       }
 
-      const namesMap = getValidatorNames(accounts);
+      const namesMap = await getValidatorNames(accounts);
       const namesObject: Record<string, string | null> = {};
       namesMap.forEach((name, account) => {
         namesObject[account] = name;
