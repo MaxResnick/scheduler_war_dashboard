@@ -8,6 +8,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import cachedNames from "../data/validator-names.json";
 import cachedValidators from "../data/validators.json";
+import cachedBamValidators from "../data/bam-validators.json";
 
 const BAM_API_URL = "https://explorer.bam.dev/api/v1/validators";
 const CACHE_REVALIDATE_SECONDS = 1800; // 30 minutes
@@ -42,33 +43,50 @@ type CachedValidators = {
 
 // Validators that report "Unknown" but are NOT Harmonic
 // These stay as "Unknown" while all other "Unknown" validators become "Harmonic"
-const notHarmonicValidators = new Set([
-  "3psxMyr7rQzywVp1MXKd1XFmFz33NjydzCoJx9t2sMQW", // OtterSec
+const notHarmonicValidators = new Set<string>([
+  // Currently empty - OtterSec now classified as Harmonic
+]);
+
+// Validators that advertise as Jito Agave on gossip but are actually running Harmonic
+const jitoButActuallyHarmonic = new Set([
+  "Hz5aLvpKScNWoe9YZWxBLrQA3qzHJivBGtfciMekk8m5",
+  "4mtXJ5pUcMMB4t8cLbi7zfDJCHfYLRrQb4qSLmh57sKL",
+  "84gC25fbFKYueR9WEfreUysk1n3ZFxLFDDjbyqeqGpoW",
+  "EXckihF3qmguH5znjhfzLvHsbk2E3nEW2DqNh4MMnDMm",
+  "5ivRNcK1yThcK3koZR1oikAfuNm6rj1LceMskayoVSzc",
 ]);
 
 const validatorNames = cachedNames as CachedValidatorNames;
 const rawValidatorsData = cachedValidators as CachedValidators;
 
+// Get BAM validators from local cache (updated at build time)
+function getLocalBamValidators(): string[] {
+  const data = cachedBamValidators as BamValidator[];
+  return data.map((v) => v.validator_pubkey);
+}
+
 /**
  * Fetch BAM validators from the explorer API with caching
+ * Falls back to local cached file if API fails
+ * Returns an array since unstable_cache serializes data (Set won't survive)
  */
 const fetchBamValidators = unstable_cache(
-  async (): Promise<Set<string>> => {
+  async (): Promise<string[]> => {
     try {
       console.log("[validators-app] Fetching BAM validators from API...");
       const response = await fetch(BAM_API_URL, {
         next: { revalidate: CACHE_REVALIDATE_SECONDS },
       });
       if (!response.ok) {
-        console.error(`[validators-app] BAM API returned ${response.status}`);
-        return new Set();
+        console.error(`[validators-app] BAM API returned ${response.status}, using local cache`);
+        return getLocalBamValidators();
       }
       const data: BamValidator[] = await response.json();
       console.log(`[validators-app] Fetched ${data.length} BAM validators`);
-      return new Set(data.map((v) => v.validator_pubkey));
+      return data.map((v) => v.validator_pubkey);
     } catch (error) {
-      console.error("[validators-app] Failed to fetch BAM validators:", error);
-      return new Set();
+      console.error("[validators-app] Failed to fetch BAM validators, using local cache:", error);
+      return getLocalBamValidators();
     }
   },
   ["bam-validators"],
@@ -79,13 +97,18 @@ const fetchBamValidators = unstable_cache(
  * Get processed validators with BAM and Harmonic overrides applied
  */
 async function getProcessedValidators(): Promise<ValidatorData[]> {
-  const bamValidatorPubkeys = await fetchBamValidators();
+  const bamValidatorsList = await fetchBamValidators();
+  const bamValidatorPubkeys = new Set(bamValidatorsList);
 
   return rawValidatorsData.validators.map((v) => {
     let softwareClient = v.softwareClient;
 
+    // Validators falsely advertising as Jito but actually running Harmonic
+    if (jitoButActuallyHarmonic.has(v.account)) {
+      softwareClient = "Harmonic";
+    }
     // BAM validators from confirmed list
-    if (bamValidatorPubkeys.has(v.account)) {
+    else if (bamValidatorPubkeys.has(v.account)) {
       softwareClient = "AgaveBam";
     }
     // If gossip says BAM but not in confirmed list, it's regular Jito

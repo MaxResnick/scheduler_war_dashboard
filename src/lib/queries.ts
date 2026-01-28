@@ -792,3 +792,97 @@ export async function fetchRecentSlotRange(hours = 4): Promise<{ minSlot: number
   if (row.min_slot === null || row.max_slot === null) return null;
   return { minSlot: row.min_slot, maxSlot: row.max_slot };
 }
+
+// Axiom tip accounts
+export const AXIOM_TIP_ACCOUNTS = [
+  "axmFmfqQwZGEUZeF3i3MqbRCDiGPfshtbdoBjk41k88",
+  "axmhpocX3hU7nT7KtsLBzNBR1Ur3HtU22Q5P313FREY",
+  "axmD4LFJopAcbRKCKsrrmovCZZzmKQCMEfs5qEXj8dG",
+  "axmWxBPqgRmcBN2cV12quqaQzsk16SazVXq8397KFKu",
+  "axmMdWvgEnN3NFrxMfTqUURzj9NLhZL2DkHkWCdgiFV",
+  "axmQTWU68qZ4fuG7zzkCXCBmxxeHVZrNrLkgxEFCbRv",
+  "axmYVq9b1ABYqtyizMtyfJppPTPxZGXPLctB3hV6W5b",
+  "axm2JQY1FKEktAwgXWqjGYkkWsWPfwKzgbnGVt5kiP4"
+] as const;
+
+/**
+ * Fetch recent slots with their leaders for transition analysis
+ * Returns slot, validator, and Axiom tx count per slot
+ * Ensures one row per slot by aggregating block metadata
+ * @param range - Time range to query
+ * @param customAccounts - Optional custom accounts to track instead of default AXIOM_TIP_ACCOUNTS
+ */
+export async function fetchSlotLeaderSequence(
+  range: TimeRange,
+  customAccounts?: string[]
+): Promise<{ slot: number; validator: string; axiomTxCount: number; totalTxCount: number; totalComputeUnits: number }[]> {
+  const client = getClickHouseClient();
+  const accounts = customAccounts && customAccounts.length > 0 ? customAccounts : AXIOM_TIP_ACCOUNTS;
+  const accountListBinary = accounts.map((acc) => `base58Decode('${acc}')`).join(", ");
+
+  const query = `
+    WITH array(${accountListBinary}) AS axiom_accounts_bin
+    SELECT
+      block_meta.slot AS slot,
+      block_meta.validator AS validator,
+      coalesce(axiom_counts.axiom_tx_count, 0) AS axiom_tx_count,
+      coalesce(total_counts.total_tx_count, 0) AS total_tx_count,
+      coalesce(total_counts.total_cu, 0) AS total_cu
+    FROM (
+      SELECT
+        slot,
+        base58Encode(any(validator_identity)) AS validator
+      FROM bam.geyser_block_metadata
+      WHERE time BETWEEN parseDateTimeBestEffort('${range.from}') AND parseDateTimeBestEffort('${range.to}')
+      GROUP BY slot
+    ) AS block_meta
+    LEFT JOIN (
+      SELECT
+        slot,
+        count() AS axiom_tx_count
+      FROM bam.geyser_transactions
+      WHERE time BETWEEN parseDateTimeBestEffort('${range.from}') AND parseDateTimeBestEffort('${range.to}')
+        AND (
+          hasAny(coalesce(static_signed_writable_accounts, []), axiom_accounts_bin)
+          OR hasAny(coalesce(static_signed_readonly_accounts, []), axiom_accounts_bin)
+          OR hasAny(coalesce(static_unsigned_writable_accounts, []), axiom_accounts_bin)
+          OR hasAny(coalesce(static_unsigned_readonly_accounts, []), axiom_accounts_bin)
+        )
+      GROUP BY slot
+    ) AS axiom_counts ON block_meta.slot = axiom_counts.slot
+    LEFT JOIN (
+      SELECT
+        slot,
+        count() AS total_tx_count,
+        sum(cu) AS total_cu
+      FROM (
+        SELECT
+          slot,
+          signature,
+          any(coalesce(compute_units_consumed, 0)) AS cu
+        FROM bam.geyser_transactions
+        WHERE time BETWEEN parseDateTimeBestEffort('${range.from}') AND parseDateTimeBestEffort('${range.to}')
+        GROUP BY slot, signature
+      )
+      GROUP BY slot
+    ) AS total_counts ON block_meta.slot = total_counts.slot
+    ORDER BY block_meta.slot ASC
+    FORMAT JSON
+  `;
+
+  const rows = (await client.query(query).toPromise()) as {
+    slot: number;
+    validator: string;
+    axiom_tx_count: number;
+    total_tx_count: number;
+    total_cu: number;
+  }[];
+
+  return rows.map((row) => ({
+    slot: row.slot,
+    validator: row.validator,
+    axiomTxCount: row.axiom_tx_count,
+    totalTxCount: row.total_tx_count,
+    totalComputeUnits: row.total_cu
+  }));
+}

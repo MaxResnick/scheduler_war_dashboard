@@ -129,6 +129,21 @@ The ClickHouse host should be hostname only (no protocol prefix). Uses native pr
 **`layout.tsx`**:
 - Root layout with Tailwind dark theme styling
 
+## CRITICAL: ClickHouse Query Limits
+
+**DO NOT run excessive queries against the ClickHouse cluster.** This is Jito's shared public infrastructure.
+
+- **NEVER** reload the page repeatedly or trigger multiple refreshes in quick succession
+- **NEVER** run queries in a loop or make parallel requests that could multiply query load
+- **ALWAYS** test queries with small time ranges first (1-2 hours) before expanding
+- **ALWAYS** use slot-level aggregation BEFORE joining with other tables to minimize memory usage
+- **AVOID** queries that scan the full `geyser_transactions` table without proper filtering
+- **PREFER** server-side caching (Next.js revalidation) to reduce query frequency
+- When developing new queries, test ONE query at a time and wait for completion before the next
+- If a query is taking too long, do NOT retry - wait for it to complete or timeout
+
+Running too many queries can take down the shared cluster and affect other users.
+
 ## Key Implementation Details
 
 - **5-minute aggregation windows**: All time-series queries use `toStartOfInterval(..., INTERVAL 5 minute)` to bucket data

@@ -109,3 +109,51 @@ export type PropAmmFirstWin = {
   account: string;
   group: string | null;
 };
+
+// Axiom routing analysis types - Leader transition analysis
+export type SlotData = {
+  slot: number;
+  validator: string;
+  validatorName: string | null;
+  validatorType: string;
+  axiomTxCount: number;
+  totalTxCount: number;
+  totalComputeUnits: number;
+};
+
+export type LeaderTransition = {
+  fromSlot: number;
+  fromValidator: string;
+  fromValidatorName: string | null;
+  fromValidatorType: string;
+  fromAxiomTxCount: number;
+  fromTotalTxCount: number;
+  toSlot: number;
+  toValidator: string;
+  toValidatorName: string | null;
+  toValidatorType: string;
+  toAxiomTxCount: number;
+  toTotalTxCount: number;
+  // 8-slot window around the transition (4 before, 4 after)
+  slotSequence: SlotData[];
+};
+
+export type TransitionStats = {
+  transitionType: string; // e.g., "BAM → Harmonic", "BAM → Jito"
+  count: number;
+  avgBamAxiomTx: number;
+  avgFollowerAxiomTx: number;
+  avgBamTotalTx: number;
+  avgFollowerTotalTx: number;
+  axiomTxRatio: number; // follower axiom / bam axiom (>1 means more axiom in follower)
+};
+
+export type AxiomRoutingPayload = {
+  range: TimeRange;
+  transitions: LeaderTransition[];
+  transitionStats: TransitionStats[];
+  totalBamSlots: number;
+  totalAxiomTxOnBam: number;
+  avgAxiomTxPerBamSlot: number;
+  avgAxiomTxPerNonBamSlot: number;
+};

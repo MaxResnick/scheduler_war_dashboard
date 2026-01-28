@@ -1,4 +1,5 @@
 import SchedulerTreemap from "@/components/scheduler-treemap";
+import ValidatorListExport from "@/components/validator-list-export";
 import { getAllValidators } from "@/lib/validators-app";
 import Link from "next/link";
 
@@ -26,6 +27,12 @@ export default async function HomePage() {
             >
               Slot Lagging →
             </Link>
+            <Link
+              href="/axiom-routing"
+              className="rounded-lg bg-red-900/60 px-4 py-2 text-sm font-medium text-red-200 transition-colors hover:bg-red-800/60"
+            >
+              Axiom Routing →
+            </Link>
           </div>
         </div>
         <p className="max-w-2xl text-sm text-slate-300">
@@ -35,6 +42,8 @@ export default async function HomePage() {
       </header>
 
       <SchedulerTreemap validators={validators} />
+
+      <ValidatorListExport validators={validators} />
     </div>
   );
 }
