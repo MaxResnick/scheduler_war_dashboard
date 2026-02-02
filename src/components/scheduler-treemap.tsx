@@ -32,6 +32,8 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Agave": "#2C3316",
   "Jito Agave": "#5F288D",
   "Frankendancer": "#fb923c",
+  "Frankendancer Vanilla": "#fdba74", // orange-300
+  "Frankendancer Rev": "#ea580c", // orange-600
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
@@ -583,6 +585,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                         style={{
                           textShadow: "0 1px 2px rgba(0,0,0,0.8)",
                         }}
+                        suppressHydrationWarning
                       >
                         {isLoading
                           ? "..."
@@ -591,7 +594,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                           : node.validator.account.slice(0, 4)}
                       </text>
                     )}
-                    <title>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(group.softwareClient)}\nClick to view slot detail`}</title>
+                    <title suppressHydrationWarning>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(group.softwareClient)}\nClick to view slot detail`}</title>
                   </g>
                 );
               })}

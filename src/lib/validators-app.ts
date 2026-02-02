@@ -9,6 +9,7 @@ import { unstable_cache } from "next/cache";
 import cachedNames from "../data/validator-names.json";
 import cachedValidators from "../data/validators.json";
 import cachedBamValidators from "../data/bam-validators.json";
+import cachedFrankendancerClassifications from "../data/frankendancer-classifications.json";
 
 const BAM_API_URL = "https://explorer.bam.dev/api/v1/validators";
 const CACHE_REVALIDATE_SECONDS = 1800; // 30 minutes
@@ -54,10 +55,21 @@ const jitoButActuallyHarmonic = new Set([
   "84gC25fbFKYueR9WEfreUysk1n3ZFxLFDDjbyqeqGpoW",
   "EXckihF3qmguH5znjhfzLvHsbk2E3nEW2DqNh4MMnDMm",
   "5ivRNcK1yThcK3koZR1oikAfuNm6rj1LceMskayoVSzc",
+  "pSoLoZx55zZz61gjxSTwHtwTg4yTwdm7ruBmyjbYgT2",
+  "9W3QTgBhkU4Bwg6cwnDJo6eGZ9BtZafSdu1Lo9JmWws7",
+  "rubyWZkfnjG716rx69n2oCAhevVZaMRQunir9VQcY2E",
+  "DZv25oNCWFvGXu9tH63BiAXvG94syweGZhbvdN3HxDxT",
 ]);
 
 const validatorNames = cachedNames as CachedValidatorNames;
 const rawValidatorsData = cachedValidators as CachedValidators;
+
+// Frankendancer classifications pre-computed at deploy time
+type FrankendancerClassifications = {
+  generatedAt: string;
+  classifications: Record<string, "Rev" | "Vanilla">;
+};
+const frankendancerClassifications = cachedFrankendancerClassifications as FrankendancerClassifications;
 
 // Get BAM validators from local cache (updated at build time)
 function getLocalBamValidators(): string[] {
@@ -94,7 +106,7 @@ const fetchBamValidators = unstable_cache(
 );
 
 /**
- * Get processed validators with BAM and Harmonic overrides applied
+ * Get processed validators with BAM, Harmonic, and Frankendancer overrides applied
  */
 async function getProcessedValidators(): Promise<ValidatorData[]> {
   const bamValidatorsList = await fetchBamValidators();
@@ -118,6 +130,13 @@ async function getProcessedValidators(): Promise<ValidatorData[]> {
     // Most "Unknown" validators are Harmonic, except those in exclusion list
     else if (v.softwareClient === "Unknown" && !notHarmonicValidators.has(v.account)) {
       softwareClient = "Harmonic";
+    }
+    // Frankendancer validators: use pre-computed classification from deploy time
+    else if (v.softwareClient === "Frankendancer") {
+      const variant = frankendancerClassifications.classifications[v.account];
+      if (variant) {
+        softwareClient = `Frankendancer ${variant}`;
+      }
     }
 
     return { ...v, softwareClient };

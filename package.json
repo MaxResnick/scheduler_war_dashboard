@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npx tsx scripts/fetch-validator-names.ts && npx tsx scripts/fetch-bam-validators.ts",
+    "prebuild": "npx tsx scripts/fetch-validator-names.ts && npx tsx scripts/fetch-bam-validators.ts && npx tsx scripts/classify-frankendancer.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "fetch-validators": "npx tsx scripts/fetch-validator-names.ts",
-    "fetch-bam-validators": "npx tsx scripts/fetch-bam-validators.ts"
+    "fetch-bam-validators": "npx tsx scripts/fetch-bam-validators.ts",
+    "classify-frankendancer": "npx tsx scripts/classify-frankendancer.ts"
   },
   "dependencies": {
     "clickhouse": "^2.6.0",
@@ -23,6 +24,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.18",
+    "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.12",
     "postcss": "^8.4.38",
