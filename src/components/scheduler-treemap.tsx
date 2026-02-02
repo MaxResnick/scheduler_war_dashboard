@@ -411,9 +411,14 @@ export default function SchedulerTreemap({ validators }: Props) {
         // Look for Harmonic validators (may be labeled as "Harmonic" in gossip data)
         const harmonicStake = groups.find(g => g.softwareClient === "Harmonic")?.totalStake ?? 0;
         const bamStake = groups.find(g => g.softwareClient === "AgaveBam")?.totalStake ?? 0;
+        const totalStake = groups.reduce((sum, g) => sum + g.totalStake, 0);
         const battleTotal = harmonicStake + bamStake;
-        const harmonicPercent = battleTotal > 0 ? (harmonicStake / battleTotal) * 100 : 50;
-        const bamPercent = battleTotal > 0 ? (bamStake / battleTotal) * 100 : 50;
+        // Relative percentages for bar widths (so the bar fills 100%)
+        const harmonicBarPercent = battleTotal > 0 ? (harmonicStake / battleTotal) * 100 : 50;
+        const bamBarPercent = battleTotal > 0 ? (bamStake / battleTotal) * 100 : 50;
+        // Absolute percentages of total stake for labels
+        const harmonicPercent = totalStake > 0 ? (harmonicStake / totalStake) * 100 : 0;
+        const bamPercent = totalStake > 0 ? (bamStake / totalStake) * 100 : 0;
 
         return (
           <div className="relative overflow-hidden rounded-xl border border-slate-700 bg-slate-900/80 p-4">
@@ -422,7 +427,7 @@ export default function SchedulerTreemap({ validators }: Props) {
               <div
                 className="absolute left-0 top-0 h-full animate-pulse"
                 style={{
-                  width: `${bamPercent}%`,
+                  width: `${bamBarPercent}%`,
                   background: "linear-gradient(90deg, #7C3AED 0%, #9333ea 50%, transparent 100%)",
                   filter: "blur(20px)"
                 }}
@@ -430,7 +435,7 @@ export default function SchedulerTreemap({ validators }: Props) {
               <div
                 className="absolute right-0 top-0 h-full animate-pulse"
                 style={{
-                  width: `${harmonicPercent}%`,
+                  width: `${harmonicBarPercent}%`,
                   background: "linear-gradient(270deg, #F5F2EB 0%, #e8e4d9 50%, transparent 100%)",
                   filter: "blur(20px)",
                   animationDelay: "0.5s"
@@ -473,7 +478,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                 <div
                   className="absolute left-0 top-0 h-full transition-all duration-1000"
                   style={{
-                    width: `${bamPercent}%`,
+                    width: `${bamBarPercent}%`,
                     background: "linear-gradient(90deg, #7C3AED 0%, #8b5cf6 70%, #a78bfa 100%)",
                     boxShadow: "0 0 20px rgba(124,58,237,0.6), inset 0 2px 4px rgba(255,255,255,0.2)"
                   }}
@@ -492,7 +497,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                 <div
                   className="absolute right-0 top-0 h-full transition-all duration-1000"
                   style={{
-                    width: `${harmonicPercent}%`,
+                    width: `${harmonicBarPercent}%`,
                     background: "linear-gradient(270deg, #F5F2EB 0%, #e8e4d9 70%, #dbd6c9 100%)",
                     boxShadow: "0 0 20px rgba(245,242,235,0.5), inset 0 2px 4px rgba(255,255,255,0.5)"
                   }}
@@ -511,7 +516,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                 {/* VS badge at meeting point */}
                 <div
                   className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-1000"
-                  style={{ left: `${bamPercent}%` }}
+                  style={{ left: `${bamBarPercent}%` }}
                 >
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-slate-900 text-xs font-black text-white"
