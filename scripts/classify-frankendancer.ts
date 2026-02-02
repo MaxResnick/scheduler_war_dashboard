@@ -169,13 +169,15 @@ async function classifyValidator(
     return "Vanilla";
   }
 
-  // Check if ALL regular transactions are in the second half (tick >= 32)
-  const allInSecondHalf = regularTxs.every((tx) => {
+  // Count how many regular transactions are in the second half (tick >= 32)
+  const secondHalfCount = regularTxs.filter((tx) => {
     const tick = findTickForTxIndex(tx.index);
     return tick >= 32;
-  });
+  }).length;
 
-  return allInSecondHalf ? "Rev" : "Vanilla";
+  // Rev if >= 95% of transactions are in the second half
+  const ratio = secondHalfCount / regularTxs.length;
+  return ratio >= 0.95 ? "Rev" : "Vanilla";
 }
 
 async function main() {
