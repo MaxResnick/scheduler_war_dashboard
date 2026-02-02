@@ -62,26 +62,12 @@ function getClickHouseClient(): ClickHouse {
   });
 }
 
-async function classifyValidator(
+const NUM_SLOTS_TO_CHECK = 5;
+
+async function classifySlot(
   client: ClickHouse,
-  validatorAccount: string
-): Promise<Classification | null> {
-  const escaped = validatorAccount.replace(/'/g, "\\'");
-
-  // Find most recent slot for this validator
-  const slotQuery = `
-    SELECT slot
-    FROM bam.geyser_block_metadata
-    WHERE validator_identity = base58Decode('${escaped}')
-    ORDER BY slot DESC
-    LIMIT 1
-    FORMAT JSON
-  `;
-
-  const slotRows = (await client.query(slotQuery).toPromise()) as { slot: number }[];
-  if (!slotRows.length) return null;
-
-  const slot = slotRows[0].slot;
+  slot: number
+): Promise<{ isRev: boolean; ratio: number; txCount: number }> {
 
   // Fetch entries to build PoH tick mapping
   const entriesQuery = `
@@ -165,8 +151,8 @@ async function classifyValidator(
   const regularTxs = transactionsRows.filter((tx) => !bundleSigSet.has(tx.signature));
 
   if (regularTxs.length === 0) {
-    // No regular transactions - default to Vanilla
-    return "Vanilla";
+    // No regular transactions - cannot determine
+    return { isRev: false, ratio: 0, txCount: 0 };
   }
 
   // Count how many regular transactions are in the second half (tick >= 32)
@@ -176,8 +162,60 @@ async function classifyValidator(
   }).length;
 
   // Rev if >= 95% of transactions are in the second half
-  const ratio = secondHalfCount / regularTxs.length;
-  return ratio >= 0.95 ? "Rev" : "Vanilla";
+  const ratio = regularTxs.length > 0 ? secondHalfCount / regularTxs.length : 0;
+  const isRev = ratio >= 0.95;
+
+  return { isRev, ratio, txCount: regularTxs.length };
+}
+
+async function classifyValidator(
+  client: ClickHouse,
+  validatorAccount: string
+): Promise<Classification> {
+  // Get the most recent slots for this validator
+  const recentSlotsQuery = `
+    SELECT slot
+    FROM bam.geyser_block_metadata
+    WHERE base58Encode(validator_identity) = '${validatorAccount}'
+    ORDER BY slot DESC
+    LIMIT ${NUM_SLOTS_TO_CHECK}
+    FORMAT JSON
+  `;
+
+  const slotsResult = await client.query(recentSlotsQuery).toPromise() as { slot: number }[];
+
+  if (slotsResult.length === 0) {
+    console.log(`    No recent slots found`);
+    return "Vanilla";
+  }
+
+  // Classify each slot
+  const slotResults: { slot: number; isRev: boolean; ratio: number; txCount: number }[] = [];
+
+  for (const { slot } of slotsResult) {
+    const result = await classifySlot(client, slot);
+    const pct = (result.ratio * 100).toFixed(1);
+    const label = result.isRev ? "Rev" : "Vanilla";
+    console.log(`      slot=${slot} txs=${result.txCount} secondHalf=${pct}% -> ${label}`);
+    slotResults.push({ slot, ...result });
+  }
+
+  // Filter to slots with transactions
+  const validResults = slotResults.filter((r) => r.txCount > 0);
+
+  if (validResults.length === 0) {
+    console.log(`    No slots with transactions`);
+    return "Vanilla";
+  }
+
+  // Majority vote: Rev if more than half of valid slots are Rev
+  const revCount = validResults.filter((r) => r.isRev).length;
+  const majorityThreshold = Math.ceil(validResults.length / 2);
+
+  const classification = revCount >= majorityThreshold ? "Rev" : "Vanilla";
+  console.log(`    -> ${revCount}/${validResults.length} Rev slots -> ${classification}`);
+
+  return classification;
 }
 
 async function main() {
@@ -203,26 +241,27 @@ async function main() {
   const client = getClickHouseClient();
   const classifications: Record<string, Classification> = {};
 
-  for (let i = 0; i < frankendancerValidators.length; i++) {
-    const validator = frankendancerValidators[i];
-    console.log(`[${i + 1}/${frankendancerValidators.length}] Classifying ${validator.name || validator.account}...`);
+  // Run classifications in parallel batches of 10
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < frankendancerValidators.length; i += BATCH_SIZE) {
+    const batch = frankendancerValidators.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (validator, idx) => {
+        const globalIdx = i + idx + 1;
+        try {
+          const result = await classifyValidator(client, validator.account);
+          return { validator, result, globalIdx };
+        } catch (error) {
+          console.error(`[${globalIdx}/${frankendancerValidators.length}] Error classifying ${validator.name || validator.account}: ${error}`);
+          return { validator, result: "Vanilla" as Classification, globalIdx };
+        }
+      })
+    );
 
-    try {
-      const result = await classifyValidator(client, validator.account);
-      if (result) {
-        classifications[validator.account] = result;
-        console.log(`  -> ${result}`);
-      } else {
-        console.log(`  -> No recent slots found, defaulting to Vanilla`);
-        classifications[validator.account] = "Vanilla";
-      }
-    } catch (error) {
-      console.error(`  -> Error: ${error}`);
-      classifications[validator.account] = "Vanilla";
+    for (const { validator, result, globalIdx } of results) {
+      classifications[validator.account] = result || "Vanilla";
+      console.log(`[${globalIdx}/${frankendancerValidators.length}] ${validator.name || validator.account} -> ${result || "Vanilla"}`);
     }
-
-    // Small delay to avoid overwhelming ClickHouse
-    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   const result: ClassificationResult = {
