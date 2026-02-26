@@ -10,8 +10,8 @@ import type {
 } from "@/lib/types";
 import Link from "next/link";
 
-// Only these 4 scheduler types
-const ALLOWED_TYPES = new Set(["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic"]);
+// Only these scheduler types
+const ALLOWED_TYPES = new Set(["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic", "Rakurai"]);
 
 function defaultTimeRange(hoursBack: number): TimeRange {
   const to = new Date();
@@ -30,10 +30,11 @@ async function fetchInitialData(): Promise<AxiomRoutingPayload> {
     getAllValidators()
   ]);
 
-  // Build validator type map
+  // Build validator type map, grouping Frankendancer Rev/Vanilla back to "Frankendancer"
   const validatorTypeMap = new Map<string, string>();
   for (const v of allValidators) {
-    validatorTypeMap.set(v.account, v.softwareClient);
+    const type = v.softwareClient.startsWith("Frankendancer") ? "Frankendancer" : v.softwareClient;
+    validatorTypeMap.set(v.account, type);
   }
 
   // Helper to get slot data with validator info

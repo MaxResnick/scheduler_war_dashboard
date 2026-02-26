@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npx tsx scripts/fetch-validator-names.ts && npx tsx scripts/fetch-bam-validators.ts && npx tsx scripts/classify-frankendancer.ts",
+    "prebuild": "npx tsx scripts/fetch-validator-names.ts && npx tsx scripts/fetch-bam-validators.ts && npx tsx scripts/fetch-rakurai-validators.ts && npx tsx scripts/classify-frankendancer.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "fetch-validators": "npx tsx scripts/fetch-validator-names.ts",
     "fetch-bam-validators": "npx tsx scripts/fetch-bam-validators.ts",
+    "fetch-rakurai-validators": "npx tsx scripts/fetch-rakurai-validators.ts",
     "classify-frankendancer": "npx tsx scripts/classify-frankendancer.ts"
   },
   "dependencies": {

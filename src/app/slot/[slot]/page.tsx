@@ -1,6 +1,8 @@
 import { fetchSlotDetail } from "@/lib/queries";
 import type { SlotDetail } from "@/lib/types";
 import { getValidatorName, getAllValidators } from "@/lib/validators-app";
+import { getClickHouseClient } from "@/lib/clickhouse";
+import Link from "next/link";
 import SlotSearch from "@/components/slot-detail/slot-search";
 import TransactionSequencingChart from "@/components/slot-detail/transaction-sequencing-chart";
 import TransactionSequencingTimeline from "@/components/slot-detail/transaction-sequencing-timeline";
@@ -16,9 +18,12 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Agave": "#2C3316",
   "JitoLabs": "#5F288D",
   "Frankendancer": "#fb923c",
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
+  "Rakurai": "#06b6d4",
   "Unknown": "#64748b",
 };
 
@@ -52,6 +57,7 @@ export default async function SlotPage({ params }: SlotPageProps) {
   let slotData: SlotDetail;
   let leaderValidatorName: string | null = null;
   let leaderValidatorClient: string | null = null;
+  let recentSlots: { slot: number; block_height: number; total_fee_lamports: number }[] = [];
   try {
     const [fetchedSlotData, allValidators] = await Promise.all([
       fetchSlotDetail(slot),
@@ -62,6 +68,13 @@ export default async function SlotPage({ params }: SlotPageProps) {
     leaderValidatorName = getValidatorName(slotData.metadata.leaderValidator);
     const leaderValidator = allValidators.find(v => v.account === slotData.metadata.leaderValidator);
     leaderValidatorClient = leaderValidator?.softwareClient ?? null;
+
+    // Fetch recent slots for this validator (non-blocking — don't fail the page if this errors)
+    try {
+      recentSlots = await fetchValidatorSlots(slotData.metadata.leaderValidator);
+    } catch {
+      // silently ignore — the section just won't show
+    }
   } catch (error) {
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
@@ -156,6 +169,36 @@ export default async function SlotPage({ params }: SlotPageProps) {
 
       <SlotSearch currentSlot={slot} />
 
+      {/* Recent Leader Slots */}
+      {recentSlots.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
+          <div className="border-b border-slate-800 px-4 py-3">
+            <h2 className="text-sm font-semibold">Recent Leader Slots</h2>
+          </div>
+          <div className="flex flex-wrap gap-2 px-4 py-3">
+            {recentSlots.map((s) => {
+              const isCurrent = s.slot === slot;
+              return (
+                <Link
+                  key={s.slot}
+                  href={`/slot/${s.slot}`}
+                  className={`rounded px-3 py-1.5 font-mono text-xs transition-colors ${
+                    isCurrent
+                      ? "bg-sky-600 text-white"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  {s.slot.toLocaleString()}
+                  <span className={`ml-1.5 ${isCurrent ? "text-sky-200" : "text-slate-500"}`}>
+                    {(s.total_fee_lamports / 1_000_000_000).toFixed(4)}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Slot Highlights */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
@@ -233,4 +276,29 @@ export default async function SlotPage({ params }: SlotPageProps) {
       </div>
     </div>
   );
+}
+
+async function fetchValidatorSlots(address: string) {
+  const client = getClickHouseClient();
+
+  const query = `
+    SELECT
+      slot,
+      any(block_height) AS block_height,
+      any(total_fee_lamports) AS total_fee_lamports
+    FROM bam.geyser_block_metadata
+    WHERE validator_identity = base58Decode('${address}')
+    GROUP BY slot
+    ORDER BY slot DESC
+    LIMIT 20
+    FORMAT JSON
+  `;
+
+  const rows = (await client.query(query).toPromise()) as {
+    slot: number;
+    block_height: number;
+    total_fee_lamports: number;
+  }[];
+
+  return rows;
 }

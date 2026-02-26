@@ -21,9 +21,12 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Agave": "#2C3316",
   "JitoLabs": "#5F288D",
   "Frankendancer": "#fb923c",
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
+  "Rakurai": "#06b6d4",
   "Unknown": "#64748b", // Neutral gray for unidentified validators
 };
 
@@ -43,27 +46,22 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
   const [selectedValidator, setSelectedValidator] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [hoveredValidator, setHoveredValidator] = useState<string | null>(null);
-  const [loadingValidator, setLoadingValidator] = useState<string | null>(null);
   const router = useRouter();
 
   const handleBarClick = async (address: string) => {
-    setLoadingValidator(address);
     try {
       const res = await fetch(`/api/validator-slots/${address}`);
-      if (res.ok) {
-        const data = await res.json();
-        const slots = data.slots ?? [];
-        // Use 5th most recent slot (index 4) to ensure Jito data is populated
-        const slotIndex = Math.min(4, slots.length - 1);
-        if (slots.length > 0 && slotIndex >= 0) {
-          router.push(`/slot/${slots[slotIndex].slot}`);
-          return;
-        }
+      if (!res.ok) throw new Error("Failed to fetch slots");
+      const data = await res.json();
+      const slots = data.slots as { slot: number }[];
+      if (slots.length > 4) {
+        router.push(`/slot/${slots[4].slot}`);
+      } else if (slots.length > 0) {
+        router.push(`/slot/${slots[0].slot}`);
       }
     } catch {
-      // ignore errors
+      // Fallback: do nothing on error
     }
-    setLoadingValidator(null);
   };
 
   const maxSlotTime = useMemo(
@@ -278,8 +276,20 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
               <span>Frankendancer</span>
             </div>
             <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded" style={{ backgroundColor: "#fdba74" }}></div>
+              <span>FD Vanilla</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded" style={{ backgroundColor: "#ea580c" }}></div>
+              <span>FD Rev</span>
+            </div>
+            <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded" style={{ backgroundColor: "#facc15" }}></div>
               <span>Paladin</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded" style={{ backgroundColor: "#06b6d4" }}></div>
+              <span>Rakurai</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded" style={{ backgroundColor: "#64748b" }}></div>
@@ -316,7 +326,6 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
 
               const labelText = name || validator.validator_address.slice(0, 8) + "...";
               const isHovered = hoveredValidator === validator.validator_address;
-              const isLoading = loadingValidator === validator.validator_address;
               const barColor = getSchedulerColor(clientType);
 
               return (
@@ -325,7 +334,7 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
                   onClick={() => handleBarClick(validator.validator_address)}
                   onMouseEnter={() => setHoveredValidator(validator.validator_address)}
                   onMouseLeave={() => setHoveredValidator(null)}
-                  style={{ cursor: isLoading ? "wait" : "pointer" }}
+                  style={{ cursor: "pointer" }}
                 >
                   <rect
                     x="0"
@@ -346,7 +355,7 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
                     className="fill-white text-[10px] font-medium pointer-events-none"
                     style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
                   >
-                    {isLoading ? "Loading..." : `${labelText} — ${validator.avg_slot_time_ms.toFixed(0)}ms`}
+                    {`${labelText} — ${validator.avg_slot_time_ms.toFixed(0)}ms`}
                   </text>
                 </g>
               );

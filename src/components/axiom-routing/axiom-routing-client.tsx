@@ -12,14 +12,15 @@ const RANGE_OPTIONS = [
 ];
 
 // The 4 scheduler types we care about
-const TYPES = ["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic"] as const;
+const TYPES = ["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic", "Rakurai"] as const;
 
 // Display names
 const TYPE_LABELS: Record<string, string> = {
   AgaveBam: "BAM",
   Frankendancer: "FD",
   JitoLabs: "Jito",
-  Harmonic: "Harmonic"
+  Harmonic: "Harmonic",
+  Rakurai: "Rakurai"
 };
 
 // Colors matching landing page
@@ -27,7 +28,8 @@ const TYPE_COLORS: Record<string, string> = {
   AgaveBam: "#7C3AED",
   Frankendancer: "#fb923c",
   JitoLabs: "#5F288D",
-  Harmonic: "#F5F2EB"
+  Harmonic: "#F5F2EB",
+  Rakurai: "#06b6d4"
 };
 
 // Nozomi tip accounts
@@ -47,9 +49,22 @@ const NOZOMI_ACCOUNTS = [
 
 // Fee spoofer accounts
 const FEE_SPOOFER_ACCOUNTS = [
+  "Aj8sfP8mHzkea5qfkkzXPnw53H7YaoxXEL8PurWp9kVi",
+  "AZWZzb16BUVsiQ91u9ih52ievb5Zbk76hPwPhQ81TtRW",
+  "FZMHygpA89vBrn81vrXtPbsdSHdNPxxDzKJzsBHsW2Tf",
+  "46mP8iyPNjcoH9bAWSUUZq6yZZLh1PnXruDxBPYPScUS",
+  "DX5rUqjNksR7amvBazRj6QFgVVfSK65bfCJnmkEyiQUN",
+  "CzXFFmu2cyWjRUtj43YzdbLoKj8uH3NAZ435pdjb89v4",
+  "5Yd7RegT2Nwea1N51zKTqBxh4RdiVXqSJHNrqDEF9KAu",
+  "EeF8HM4cgVCP6rMPNBLRbtFtHZTzWnKWpEEh65JFG1Zh",
+  "VBbfxszZsqUN5j7G7L6PiQ61w4bYvHimAMXBHQHZYDq",
+  "FEbj5gZprZbjUSSV68Y4ZvMohbh3xMq589SyTcyXkfeA",
+  "CvsrGEpriBCSsJkhRAgpqADoQRruYkCsHRaPykxqz52w",
   "HgJHG9FJfkvnwEuUT9AeoH5y6DWDVe6w5dMFz6oUVDpF",
+  "8MQhJWX4EgLiaaiU95PD1BMqqaJmxdAmQuser7uArzsX",
   "5cfsiKeymyf677VG1dctX2XzGxq4nshpX66SVoZQTDSJ",
-  "DX5rUqjNksR7amvBazRj6QFgVVfSK65bfCJnmkEyiQUN"
+  "75t7BQaToyooGEHK1ntndHZfjZZHGuBMRx4FwqFMZwgH",
+  "9C6SSwLMmYTo7wNkumkZgineg1p5EPpdwZEmPpMMur3t",
 ];
 
 type AxiomRoutingClientProps = {

@@ -9,9 +9,12 @@ const SCHEDULER_COLORS: Record<string, string> = {
   AgaveBam: "#7C3AED",
   JitoLabs: "#5F288D",
   Frankendancer: "#fb923c",
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   Harmonic: "#F5F2EB",
   Firedancer: "#ef4444",
   Agave: "#2C3316",
+  Rakurai: "#06b6d4",
   Unknown: "#64748b",
 };
 
@@ -19,9 +22,12 @@ const SCHEDULER_LABELS: Record<string, string> = {
   AgaveBam: "BAM",
   JitoLabs: "Jito Agave",
   Frankendancer: "Frankendancer",
+  "Frankendancer Vanilla": "FD Vanilla",
+  "Frankendancer Rev": "FD Rev",
   Harmonic: "Harmonic",
   Firedancer: "Firedancer",
   Agave: "Agave",
+  Rakurai: "Rakurai",
   Unknown: "Unknown",
 };
 

@@ -1,0 +1,102 @@
+[
+  {
+    "validator_identity": "Fd7btgySsrjuo25CJCj7oE7VPMyezDhnx7pZkj2v69Nk",
+    "name": "Figment",
+    "activated_stake": 13122002.09
+  },
+  {
+    "validator_identity": "DCdTPyDbXNHrmdv4ZyPPzEfY4mPAqH4hDPtowAteoNgv",
+    "name": "bloXroute US",
+    "activated_stake": 170968.8
+  },
+  {
+    "validator_identity": "VALiDcyCpujxjJAZDK2av2TpMAigpSodzj2ApqgR4e6",
+    "name": "Validators.link",
+    "activated_stake": 186593.9
+  },
+  {
+    "validator_identity": "WUNoB9YQXmXXRcJsjY1G8PfVag5aAfnyGmFd6YwJVwp",
+    "name": "StakeCraft",
+    "activated_stake": 153481.59
+  },
+  {
+    "validator_identity": "forb5u56XgvzxiKfRt4FVNFQKJrd2LWAfNCsCqL6P7q",
+    "name": "Forbole",
+    "activated_stake": 208035.04
+  },
+  {
+    "validator_identity": "c3rtoMCHSbFrLRTAdw4iRowKSn4BrDtvSPbuyJwkHwx",
+    "name": "Latitude.sh",
+    "activated_stake": 117899.56
+  },
+  {
+    "validator_identity": "Stakex4B2tpDHPWGvV1dninfiaYCGdakgTknpzPitLh",
+    "name": "Stake.org",
+    "activated_stake": 195350.67
+  },
+  {
+    "validator_identity": "jagBNeXYncnn1hzwSq1JJ16XhWTgQ7DCFVqndSJZ6vT",
+    "name": "Jaguar",
+    "activated_stake": 145092.68
+  },
+  {
+    "validator_identity": "44VSCibTpr8Fn1Hk8fazhkuSrrSTYZX2f76b2xqKPwmt",
+    "name": "",
+    "activated_stake": 229258.52
+  },
+  {
+    "validator_identity": "2dfgsiSaZ51QYPsECMYMG247PXxyKdwkV9wTHoQb8YEC",
+    "name": "Astraeus",
+    "activated_stake": 342845.57
+  },
+  {
+    "validator_identity": "SLAY6uN1zZpXBTfbuDDCesNmM5D288xrz8uYvfS3n41",
+    "name": "Solayer Validator [5% Commission + 100% MEV Kickback]",
+    "activated_stake": 362630.3
+  },
+  {
+    "validator_identity": "BCeczqpTRPigndHVJu1KEzno1Uhb4hjrE7ttmAndrV1p",
+    "name": "GlobalStake [Bare Metal]",
+    "activated_stake": 257819.91
+  },
+  {
+    "validator_identity": "gVALrRd3xq4D62KJNGDCpMMGz976w2x1Vo79mSNn4bh",
+    "name": "Guardian Validator",
+    "activated_stake": 143786.83
+  },
+  {
+    "validator_identity": "Ha1iade1AH3B12K9SccfWoPdFtQKKQsj2ZyWwxcjqJJU",
+    "name": "Ha1iad3",
+    "activated_stake": 850664.33
+  },
+  {
+    "validator_identity": "bxrAptB5ZpZBhoLedJpoGWY5hBjjt3zvVBr2323Rrq6",
+    "name": "bloXroute EU",
+    "activated_stake": 245085.5
+  },
+  {
+    "validator_identity": "E9hD3ikumJx1GVswDjnpCt6Uu4WG5mz1PDWCqdE5uhmo",
+    "name": "STAKR.space 🔅+MEV!",
+    "activated_stake": 63003.46
+  },
+  {
+    "validator_identity": "7cVfgArCheMR6Cs4t6vz5rfnqd56vZq4ndaBrY5xkxXy",
+    "name": "Blockdaemon 🧱👿 Validator",
+    "activated_stake": 2382189.91
+  },
+  {
+    "validator_identity": "8T8AJfUCXwPFwEMmjca8gCRSktPrqbUBVa6ggNyhLhFJ",
+    "name": "StudentSOL",
+    "activated_stake": 152130.68
+  },
+  {
+    "validator_identity": "Ed9WjPnZfAXsPttcqxMwj94qsuXVRyBsyXnDkxFva2Zv",
+    "name": "Rakurai | High TPS | High rewards",
+    "activated_stake": 181333.81
+  },
+  {
+    "validator_identity": "ana2y2YvQ3ZPMwm6qhnN3nJoUSiT3qx5Pvetkq9xcfY",
+    "name": "Anagram Staking",
+    "activated_stake": 1784935.57
+  }
+]

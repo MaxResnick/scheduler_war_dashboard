@@ -24,7 +24,6 @@ type ValidatorSuggestion = {
 
 export default function SlotSearch({ currentSlot }: SlotSearchProps) {
   const [inputValue, setInputValue] = useState(currentSlot?.toString() ?? "");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -68,31 +67,19 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
     router.push(`/slot/${slot}`);
   };
 
-  const navigateToValidator = (address: string) => {
-    setIsLoading(true);
-    setError(null);
+  const navigateToValidator = async (address: string) => {
     setShowDropdown(false);
-
-    fetch(`/api/validator-slots/${address}`)
-      .then(async (res) => {
-        if (!res.ok) {
-          const { error: message } = await res.json();
-          throw new Error(message || "Failed to fetch slots");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        const slots = data.slots ?? [];
-        if (slots.length > 0) {
-          router.push(`/slot/${slots[0].slot}`);
-        } else {
-          setError("No recent slots found for this validator.");
-        }
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "Request failed");
-      })
-      .finally(() => setIsLoading(false));
+    try {
+      const res = await fetch(`/api/validator-slots/${address}`);
+      if (!res.ok) throw new Error("Failed to fetch slots");
+      const data = await res.json();
+      const slots = data.slots as { slot: number }[];
+      if (slots.length > 0) {
+        router.push(`/slot/${slots[0].slot}`);
+      }
+    } catch {
+      setError("Failed to find recent slots for this validator");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -171,10 +158,9 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
           />
           <button
             type="submit"
-            disabled={isLoading}
-            className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50"
+            className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
           >
-            {isLoading ? "Loading..." : "Go"}
+            Go
           </button>
         </form>
 
@@ -214,7 +200,6 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
       </div>
 
       {/* Status messages */}
-      {isLoading && <p className="text-xs text-slate-400">Finding most recent slot...</p>}
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );

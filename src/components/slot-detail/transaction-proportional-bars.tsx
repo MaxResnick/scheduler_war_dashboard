@@ -15,16 +15,39 @@ type BarDatum = {
   index: number;
   value: number; // base for width
   isJito: boolean;
+  isFeeSpoofed: boolean;
 };
+
+const FEE_SPOOFER_ACCOUNTS = new Set([
+  "Aj8sfP8mHzkea5qfkkzXPnw53H7YaoxXEL8PurWp9kVi",
+  "AZWZzb16BUVsiQ91u9ih52ievb5Zbk76hPwPhQ81TtRW",
+  "FZMHygpA89vBrn81vrXtPbsdSHdNPxxDzKJzsBHsW2Tf",
+  "46mP8iyPNjcoH9bAWSUUZq6yZZLh1PnXruDxBPYPScUS",
+  "DX5rUqjNksR7amvBazRj6QFgVVfSK65bfCJnmkEyiQUN",
+  "CzXFFmu2cyWjRUtj43YzdbLoKj8uH3NAZ435pdjb89v4",
+  "5Yd7RegT2Nwea1N51zKTqBxh4RdiVXqSJHNrqDEF9KAu",
+  "EeF8HM4cgVCP6rMPNBLRbtFtHZTzWnKWpEEh65JFG1Zh",
+  "VBbfxszZsqUN5j7G7L6PiQ61w4bYvHimAMXBHQHZYDq",
+  "FEbj5gZprZbjUSSV68Y4ZvMohbh3xMq589SyTcyXkfeA",
+  "CvsrGEpriBCSsJkhRAgpqADoQRruYkCsHRaPykxqz52w",
+  "HgJHG9FJfkvnwEuUT9AeoH5y6DWDVe6w5dMFz6oUVDpF",
+  "8MQhJWX4EgLiaaiU95PD1BMqqaJmxdAmQuser7uArzsX",
+  "5cfsiKeymyf677VG1dctX2XzGxq4nshpX66SVoZQTDSJ",
+  "75t7BQaToyooGEHK1ntndHZfjZZHGuBMRx4FwqFMZwgH",
+  "9C6SSwLMmYTo7wNkumkZgineg1p5EPpdwZEmPpMMur3t",
+]);
 
 const SCHEDULER_COLORS: Record<string, string> = {
   "AgaveBam": "#7C3AED",
   "Agave": "#2C3316",
   "JitoLabs": "#5F288D",
   "Frankendancer": "#fb923c",
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
+  "Rakurai": "#06b6d4",
   "Unknown": "#64748b",
 };
 
@@ -38,14 +61,22 @@ function getClientColor(softwareClient: string): string {
   return SCHEDULER_COLORS[softwareClient] ?? "#64748b";
 }
 
+function touchesFeeSpoofer(t: SlotTransaction): boolean {
+  const signers = [
+    ...(t.staticSignedWritableAccounts ?? []),
+    ...(t.staticSignedReadonlyAccounts ?? []),
+  ];
+  return signers.some((a) => FEE_SPOOFER_ACCOUNTS.has(a));
+}
+
 function makeBars(tx: SlotTransaction[], pick: (t: SlotTransaction) => number | null) {
   const series: BarDatum[] = tx
     .filter((t) => !t.isVote) // exclude vote transactions
     .map((t) => ({
       index: t.index,
       value: Math.max(0, pick(t) ?? 0),
-      // Use the bundle-derived flag only
-      isJito: Boolean(t.isJitoBundle)
+      isJito: Boolean(t.isJitoBundle),
+      isFeeSpoofed: touchesFeeSpoofer(t),
     }));
   const total = series.reduce((a, b) => a + b.value, 0);
   return { series, total };
@@ -74,8 +105,9 @@ export default function TransactionProportionalBars({
   );
 
   // Solid colors (non-pastel) for stronger contrast
-  const jitoColor = "#ef4444"; // red-500
+  const jitoColor = "#5F288D"; // jito purple
   const nonJitoColor = "#60a5fa"; // blue-400
+  const feeSpoofColor = "#F5F2EB"; // harmonic cream
 
   function renderPanel(
     yOffset: number,
@@ -123,7 +155,7 @@ export default function TransactionProportionalBars({
         {/* bars */}
         {series.map((d, i) => {
           const w = (d.value / total) * plotWidth;
-          const color = d.isJito ? jitoColor : nonJitoColor;
+          const color = d.isFeeSpoofed ? feeSpoofColor : d.isJito ? jitoColor : nonJitoColor;
           const rect = (
             <rect
               key={`seg-${i}`}
@@ -162,6 +194,7 @@ export default function TransactionProportionalBars({
       <div className="mt-2 flex items-center gap-6 text-xs text-slate-400">
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: jitoColor}}></span>Jito bundle</div>
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: nonJitoColor}}></span>Regular transactions</div>
+        <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: feeSpoofColor}}></span>Temporal controlled fee payer</div>
       </div>
     </div>
   );

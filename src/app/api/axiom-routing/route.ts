@@ -9,8 +9,8 @@ import type {
   SlotData
 } from "@/lib/types";
 
-// Only these 4 scheduler types
-const ALLOWED_TYPES = new Set(["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic"]);
+// Only these scheduler types
+const ALLOWED_TYPES = new Set(["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic", "Rakurai"]);
 
 // Simple in-memory cache to prevent excessive queries
 const cache = new Map<string, { data: AxiomRoutingPayload; timestamp: number }>();
@@ -52,10 +52,11 @@ export async function GET(request: Request) {
       getAllValidators()
     ]);
 
-    // Build validator type map
+    // Build validator type map, grouping Frankendancer Rev/Vanilla back to "Frankendancer"
     const validatorTypeMap = new Map<string, string>();
     for (const v of allValidators) {
-      validatorTypeMap.set(v.account, v.softwareClient);
+      const type = v.softwareClient.startsWith("Frankendancer") ? "Frankendancer" : v.softwareClient;
+      validatorTypeMap.set(v.account, type);
     }
 
     // Helper to get slot data with validator info

@@ -37,6 +37,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
+  "Rakurai": "#06b6d4",
   "Unknown": "#64748b", // Neutral gray for unidentified validators
 };
 
@@ -288,7 +289,6 @@ function formatStake(lamports: number): string {
 
 export default function SchedulerTreemap({ validators }: Props) {
   const [hoveredValidator, setHoveredValidator] = useState<string | null>(null);
-  const [loadingValidator, setLoadingValidator] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [containerWidth, setContainerWidth] = useState(1200);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -352,23 +352,19 @@ export default function SchedulerTreemap({ validators }: Props) {
   );
 
   const handleValidatorClick = async (address: string) => {
-    setLoadingValidator(address);
     try {
       const res = await fetch(`/api/validator-slots/${address}`);
-      if (res.ok) {
-        const data = await res.json();
-        const slots = data.slots ?? [];
-        // Use 5th most recent slot (index 4) to ensure Jito data is populated
-        const slotIndex = Math.min(4, slots.length - 1);
-        if (slots.length > 0 && slotIndex >= 0) {
-          router.push(`/slot/${slots[slotIndex].slot}`);
-          return;
-        }
+      if (!res.ok) throw new Error("Failed to fetch slots");
+      const data = await res.json();
+      const slots = data.slots as { slot: number }[];
+      if (slots.length > 4) {
+        router.push(`/slot/${slots[4].slot}`);
+      } else if (slots.length > 0) {
+        router.push(`/slot/${slots[0].slot}`);
       }
     } catch {
-      // ignore errors
+      // Fallback: navigate to the first slot page without a specific slot
     }
-    setLoadingValidator(null);
   };
 
   if (validators.length === 0) {
@@ -557,7 +553,6 @@ export default function SchedulerTreemap({ validators }: Props) {
               {/* Validator nodes */}
               {group.nodes.map((node) => {
                 const isHovered = hoveredValidator === node.validator.account;
-                const isLoading = loadingValidator === node.validator.account;
                 const isHighlighted = isValidatorHighlighted(node.validator);
                 const minDimension = Math.min(node.width, node.height);
                 const showLabel = minDimension > 30;
@@ -568,7 +563,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                     onClick={() => handleValidatorClick(node.validator.account)}
                     onMouseEnter={() => setHoveredValidator(node.validator.account)}
                     onMouseLeave={() => setHoveredValidator(null)}
-                    style={{ cursor: isLoading ? "wait" : "pointer" }}
+                    style={{ cursor: "pointer" }}
                   >
                     <rect
                       x={node.x}
@@ -592,14 +587,12 @@ export default function SchedulerTreemap({ validators }: Props) {
                         }}
                         suppressHydrationWarning
                       >
-                        {isLoading
-                          ? "..."
-                          : node.validator.name
+                        {node.validator.name
                           ? node.validator.name.slice(0, Math.floor(node.width / 6))
                           : node.validator.account.slice(0, 4)}
                       </text>
                     )}
-                    <title suppressHydrationWarning>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(group.softwareClient)}\nClick to view slot detail`}</title>
+                    <title suppressHydrationWarning>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(group.softwareClient)}\nClick to view recent slots`}</title>
                   </g>
                 );
               })}

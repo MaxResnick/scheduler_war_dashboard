@@ -9,9 +9,11 @@ import { unstable_cache } from "next/cache";
 import cachedNames from "../data/validator-names.json";
 import cachedValidators from "../data/validators.json";
 import cachedBamValidators from "../data/bam-validators.json";
+import cachedRakuraiValidators from "../data/rakurai-validators.json";
 import cachedFrankendancerClassifications from "../data/frankendancer-classifications.json";
 
 const BAM_API_URL = "https://explorer.bam.dev/api/v1/validators";
+const RAKURAI_API_URL = "https://api.rakurai.io/api/v1/validators/overview";
 const CACHE_REVALIDATE_SECONDS = 1800; // 30 minutes
 
 // Type for BAM validators from the API
@@ -20,6 +22,13 @@ type BamValidator = {
   bam_node_connection: string;
   stake: number;
   stake_percentage: number;
+};
+
+// Type for Rakurai validators from the API
+type RakuraiValidator = {
+  validator_identity: string;
+  name: string;
+  activated_stake: number;
 };
 
 // Type for the cached data structures
@@ -48,8 +57,8 @@ const notHarmonicValidators = new Set<string>([
   // Currently empty - OtterSec now classified as Harmonic
 ]);
 
-// Validators that advertise as Jito Agave on gossip but are actually running Harmonic
-const jitoButActuallyHarmonic = new Set([
+// Validators that misreport their client on gossip but are actually running Harmonic
+const actuallyHarmonic = new Set([
   "Hz5aLvpKScNWoe9YZWxBLrQA3qzHJivBGtfciMekk8m5",
   "4mtXJ5pUcMMB4t8cLbi7zfDJCHfYLRrQb4qSLmh57sKL",
   "84gC25fbFKYueR9WEfreUysk1n3ZFxLFDDjbyqeqGpoW",
@@ -59,6 +68,16 @@ const jitoButActuallyHarmonic = new Set([
   "9W3QTgBhkU4Bwg6cwnDJo6eGZ9BtZafSdu1Lo9JmWws7",
   "rubyWZkfnjG716rx69n2oCAhevVZaMRQunir9VQcY2E",
   "DZv25oNCWFvGXu9tH63BiAXvG94syweGZhbvdN3HxDxT",
+  "JupmVLmA8RoyTUbTMMuTtoPWHEiNQobxgTeGTrPNkzT", // Jupiter
+  "privaEdSEmnMPGPoQACUkcDGkFBbTArVvsEGd7C5wUM",
+  "AMukCLCr52XxsEjXoDxKKxjNg4FpnsReXNaQx8aR6DJF",
+  "CaveyttUBTKttncu1e4RF814XjuoGfYv8cEsiKGDNCPX",
+  "FugJZepeGfh1Ruunhep19JC4F3Hr2FL3oKUMezoK8ajp",
+  "9iFPQbP1jGkj67sXg6YLLGRUBVEDMcapdS6jmCZSnz8R",
+  "simpRo1FrQYGa1moicfgnPDp6KyE38d4gYrZzhjXYJb",
+  "BoNKmNCGvoHS4CkKvYRnF21iEpUP827pZjhFGdA4t5as",
+  "7ZjHeeYEesmBs4N6aDvCQimKdtJX2bs5boXpJmpG2bZJ",
+  "GoeW4aFK4dGoekJySgUynWDxBZiQJqm8GDAF4H53tDK9", // Twinstake
 ]);
 
 const validatorNames = cachedNames as CachedValidatorNames;
@@ -75,6 +94,12 @@ const frankendancerClassifications = cachedFrankendancerClassifications as Frank
 function getLocalBamValidators(): string[] {
   const data = cachedBamValidators as BamValidator[];
   return data.map((v) => v.validator_pubkey);
+}
+
+// Get Rakurai validators from local cache (updated at build time)
+function getLocalRakuraiValidators(): string[] {
+  const data = cachedRakuraiValidators as RakuraiValidator[];
+  return data.map((v) => v.validator_identity);
 }
 
 /**
@@ -106,18 +131,54 @@ const fetchBamValidators = unstable_cache(
 );
 
 /**
+ * Fetch Rakurai validators from their API with caching
+ * Falls back to local cached file if API fails
+ */
+const fetchRakuraiValidators = unstable_cache(
+  async (): Promise<string[]> => {
+    try {
+      console.log("[validators-app] Fetching Rakurai validators from API...");
+      const response = await fetch(RAKURAI_API_URL, {
+        next: { revalidate: CACHE_REVALIDATE_SECONDS },
+      });
+      if (!response.ok) {
+        console.error(`[validators-app] Rakurai API returned ${response.status}, using local cache`);
+        return getLocalRakuraiValidators();
+      }
+      const data = await response.json();
+      const validators = data.validators as Array<{ identity: string }>;
+      console.log(`[validators-app] Fetched ${validators.length} Rakurai validators`);
+      return validators.map((v) => v.identity);
+    } catch (error) {
+      console.error("[validators-app] Failed to fetch Rakurai validators, using local cache:", error);
+      return getLocalRakuraiValidators();
+    }
+  },
+  ["rakurai-validators"],
+  { revalidate: CACHE_REVALIDATE_SECONDS }
+);
+
+/**
  * Get processed validators with BAM, Harmonic, and Frankendancer overrides applied
  */
 async function getProcessedValidators(): Promise<ValidatorData[]> {
-  const bamValidatorsList = await fetchBamValidators();
+  const [bamValidatorsList, rakuraiValidatorsList] = await Promise.all([
+    fetchBamValidators(),
+    fetchRakuraiValidators(),
+  ]);
   const bamValidatorPubkeys = new Set(bamValidatorsList);
+  const rakuraiValidatorPubkeys = new Set(rakuraiValidatorsList);
 
   return rawValidatorsData.validators.map((v) => {
     let softwareClient = v.softwareClient;
 
-    // Validators falsely advertising as Jito but actually running Harmonic
-    if (jitoButActuallyHarmonic.has(v.account)) {
+    // Validators that misreport their client but are actually running Harmonic
+    if (actuallyHarmonic.has(v.account)) {
       softwareClient = "Harmonic";
+    }
+    // Rakurai validators from confirmed list (checked before BAM since some overlap)
+    else if (rakuraiValidatorPubkeys.has(v.account)) {
+      softwareClient = "Rakurai";
     }
     // BAM validators from confirmed list
     else if (bamValidatorPubkeys.has(v.account)) {

@@ -8,6 +8,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "JitoLabs": "#5F288D",      // darker purple
   "Frankendancer": "#fb923c", // orange
   "Harmonic": "#F5F2EB",      // cream/white
+  "Rakurai": "#06b6d4",       // cyan
 };
 
 // Display name mapping
@@ -15,6 +16,7 @@ function getDisplayName(validatorType: string): string {
   if (validatorType === "JitoLabs") return "Jito";
   if (validatorType === "AgaveBam") return "BAM";
   if (validatorType === "Frankendancer") return "FD";
+  if (validatorType === "Rakurai") return "Rakurai";
   return validatorType;
 }
 

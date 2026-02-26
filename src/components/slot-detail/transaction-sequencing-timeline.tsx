@@ -19,9 +19,12 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Agave": "#2C3316",
   "JitoLabs": "#5F288D",
   "Frankendancer": "#fb923c",
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
   "Harmonic": "#F5F2EB",
+  "Rakurai": "#06b6d4",
   "Unknown": "#64748b",
 };
 
