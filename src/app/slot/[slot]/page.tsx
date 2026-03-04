@@ -1,7 +1,5 @@
-import { fetchSlotDetail } from "@/lib/queries";
 import type { SlotDetail } from "@/lib/types";
-import { getValidatorName, getAllValidators } from "@/lib/validators-app";
-import { getClickHouseClient } from "@/lib/clickhouse";
+import { schedulerApiGet } from "@/lib/backend-api";
 import Link from "next/link";
 import SlotSearch from "@/components/slot-detail/slot-search";
 import TransactionSequencingChart from "@/components/slot-detail/transaction-sequencing-chart";
@@ -59,19 +57,29 @@ export default async function SlotPage({ params }: SlotPageProps) {
   let leaderValidatorClient: string | null = null;
   let recentSlots: { slot: number; block_height: number; total_fee_lamports: number }[] = [];
   try {
-    const [fetchedSlotData, allValidators] = await Promise.all([
-      fetchSlotDetail(slot),
-      getAllValidators(),
-    ]);
-    slotData = fetchedSlotData;
-    // Get validator name and client from cached data
-    leaderValidatorName = getValidatorName(slotData.metadata.leaderValidator);
-    const leaderValidator = allValidators.find(v => v.account === slotData.metadata.leaderValidator);
-    leaderValidatorClient = leaderValidator?.softwareClient ?? null;
+    slotData = await schedulerApiGet<SlotDetail>(`/slots/${slot}`);
 
-    // Fetch recent slots for this validator (non-blocking — don't fail the page if this errors)
+    const leaderValidator = slotData.metadata.leaderValidator;
+    const [namesResult, allValidatorsResult] = await Promise.all([
+      schedulerApiGet<{ names: Record<string, string | null> }>("/validators/names", {
+        accounts: leaderValidator
+      }),
+      schedulerApiGet<{
+        validators: Array<{ account: string; softwareClient: string }>;
+      }>("/validators", { includeStake: "true" })
+    ]);
+
+    leaderValidatorName = namesResult.names[leaderValidator] ?? null;
+    const leaderValidatorData = allValidatorsResult.validators.find(
+      (v) => v.account === leaderValidator
+    );
+    leaderValidatorClient = leaderValidatorData?.softwareClient ?? null;
+
     try {
-      recentSlots = await fetchValidatorSlots(slotData.metadata.leaderValidator);
+      const recentSlotResult = await schedulerApiGet<{
+        slots: { slot: number; block_height: number; total_fee_lamports: number }[];
+      }>(`/validators/${leaderValidator}/slots`, { limit: 20 });
+      recentSlots = recentSlotResult.slots;
     } catch {
       // silently ignore — the section just won't show
     }
@@ -276,29 +284,4 @@ export default async function SlotPage({ params }: SlotPageProps) {
       </div>
     </div>
   );
-}
-
-async function fetchValidatorSlots(address: string) {
-  const client = getClickHouseClient();
-
-  const query = `
-    SELECT
-      slot,
-      any(block_height) AS block_height,
-      any(total_fee_lamports) AS total_fee_lamports
-    FROM bam.geyser_block_metadata
-    WHERE validator_identity = base58Decode('${address}')
-    GROUP BY slot
-    ORDER BY slot DESC
-    LIMIT 20
-    FORMAT JSON
-  `;
-
-  const rows = (await client.query(query).toPromise()) as {
-    slot: number;
-    block_height: number;
-    total_fee_lamports: number;
-  }[];
-
-  return rows;
 }

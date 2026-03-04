@@ -1,5 +1,5 @@
 import GeyserEntryPlot from "@/components/methodology/geyser-entry-plot";
-import { fetchRecentSlotRange, fetchSlotDetail } from "@/lib/queries";
+import { schedulerApiGet } from "@/lib/backend-api";
 import type { SlotDetail } from "@/lib/types";
 import Link from "next/link";
 
@@ -28,7 +28,7 @@ async function loadSlotDetailForPage(slotParam?: string): Promise<{
 
   if (slotNumber) {
     try {
-      detail = await fetchSlotDetail(slotNumber);
+      detail = await schedulerApiGet<SlotDetail>(`/slots/${slotNumber}`);
     } catch (err) {
       error =
         err instanceof Error
@@ -39,10 +39,13 @@ async function loadSlotDetailForPage(slotParam?: string): Promise<{
 
   if (!detail) {
     try {
-      const range = await fetchRecentSlotRange(1);
+      const range = await schedulerApiGet<{ minSlot: number; maxSlot: number }>(
+        "/slots/range/recent",
+        { hours: 1 }
+      );
       const fallbackSlot = range?.maxSlot ?? null;
       if (fallbackSlot) {
-        detail = await fetchSlotDetail(fallbackSlot);
+        detail = await schedulerApiGet<SlotDetail>(`/slots/${fallbackSlot}`);
         slotNumber = fallbackSlot;
         usedFallback = true;
       }

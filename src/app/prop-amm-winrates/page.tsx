@@ -1,8 +1,7 @@
 import PropAmmWinrateScatter, {
   ValidatorWinRate
 } from "@/components/prop-amm-winrate-scatter";
-import { fetchPropAmmFirstWins } from "@/lib/queries";
-import { getEpochPropAmmWinData, getRecentPropAmmWinData } from "@/lib/prop-amm-cache";
+import { schedulerApiGet } from "@/lib/backend-api";
 import { PROP_AMM_GROUPS, PROP_AMM_GROUP_COLORS, PropAmmGroup } from "@/lib/prop-amm";
 import type { PropAmmFirstWin } from "@/lib/types";
 
@@ -108,10 +107,26 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
   let cacheLabel: string | null = null;
   let epochNumber: number | null = null;
   let defaultSource: "epoch" | "recent" | "custom" = useCustomRange ? "custom" : "epoch";
+  type WinratePayload = {
+    startSlot: number;
+    endSlot: number;
+    generatedAt: string;
+    wins: PropAmmFirstWin[];
+    epoch?: number | null;
+    label?: string;
+    meta?: { stale?: boolean };
+  };
 
   if (useCustomRange) {
     try {
-      wins = await fetchPropAmmFirstWins(startSlotParam, endSlotParam);
+      const customRangeResult = await schedulerApiGet<{
+        data: PropAmmFirstWin[];
+        meta?: { stale?: boolean };
+      }>("/prop-amm/first-wins", {
+        startSlot: startSlotParam,
+        endSlot: endSlotParam
+      });
+      wins = customRangeResult.data;
       const [fromSlot, toSlot] =
         startSlotParam <= endSlotParam
           ? [startSlotParam, endSlotParam]
@@ -123,7 +138,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
     }
   } else {
     try {
-      const cache = await getEpochPropAmmWinData();
+      const cache = await schedulerApiGet<WinratePayload>("/prop-amm/winrates/epoch");
       wins = cache.wins;
       normalizedStart = cache.startSlot;
       normalizedEnd = cache.endSlot;
@@ -132,7 +147,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
       epochNumber = cache.epoch ?? null;
     } catch (err) {
       try {
-        const fallback = await getRecentPropAmmWinData();
+        const fallback = await schedulerApiGet<WinratePayload>("/prop-amm/winrates/recent");
         wins = fallback.wins;
         normalizedStart = fallback.startSlot;
         normalizedEnd = fallback.endSlot;

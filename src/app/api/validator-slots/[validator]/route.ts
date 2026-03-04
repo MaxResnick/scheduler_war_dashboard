@@ -1,52 +1,27 @@
 import { NextResponse } from "next/server";
-import { getClickHouseClient } from "@/lib/clickhouse";
-
-const VALIDATOR_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,64}$/;
+import { schedulerApiFetch } from "@/lib/backend-api";
 
 export async function GET(
-  _req: Request,
+  request: Request,
   { params }: { params: { validator: string } }
 ) {
   const validator = params.validator;
-
-  if (!validator || !VALIDATOR_REGEX.test(validator)) {
-    return NextResponse.json(
-      { error: "Invalid validator address" },
-      { status: 400 }
-    );
-  }
+  const search = new URL(request.url).search;
 
   try {
-    const client = getClickHouseClient();
+    const upstream = await schedulerApiFetch(`/validators/${validator}/slots${search}`);
+    const payload = await upstream.json();
 
-    const query = `
-      SELECT
-        slot,
-        any(block_height) AS block_height,
-        any(total_fee_lamports) AS total_fee_lamports
-      FROM bam.geyser_block_metadata
-      WHERE validator_identity = base58Decode('${validator}')
-      GROUP BY slot
-      ORDER BY slot DESC
-      LIMIT 20
-      FORMAT JSON
-    `;
+    if (payload && typeof payload === "object" && "meta" in payload) {
+      delete (payload as Record<string, unknown>).meta;
+    }
 
-    const rows = (await client.query(query).toPromise()) as {
-      slot: number;
-      block_height: number;
-      total_fee_lamports: number;
-    }[];
-
-    return NextResponse.json({ slots: rows });
+    return NextResponse.json(payload, { status: upstream.status });
   } catch (error) {
-    console.error("[validator-slots] Failed to fetch slots", error);
+    console.error("[validator-slots-api-proxy] Failed to reach scheduler API", error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Unable to fetch validator slots"
-      },
-      { status: 500 }
+      { error: "Unable to fetch validator slots" },
+      { status: 502 }
     );
   }
 }

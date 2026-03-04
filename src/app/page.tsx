@@ -1,10 +1,17 @@
 import SchedulerTreemap from "@/components/scheduler-treemap";
 import ValidatorListExport from "@/components/validator-list-export";
-import { getAllValidators } from "@/lib/validators-app";
+import { schedulerApiGet } from "@/lib/backend-api";
 import Link from "next/link";
 
 export default async function HomePage() {
-  const validators = await getAllValidators();
+  const { validators } = await schedulerApiGet<{
+    validators: Array<{
+      account: string;
+      name: string | null;
+      activeStake: number;
+      softwareClient: string;
+    }>;
+  }>("/validators", { includeStake: "true" });
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">

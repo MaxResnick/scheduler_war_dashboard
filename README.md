@@ -9,7 +9,10 @@ Next.js dashboard for monitoring Solana scheduler war metrics. Connects to Click
    pnpm install
    # or npm install / yarn install
    ```
-2. Copy `.env.example` to `.env.local` and provide ClickHouse credentials with TLS enabled (`https` on port `8443` or native on port `9440`). If your ClickHouse deployment requires mutual TLS, supply the client certificate/key paths as well.
+2. Copy `.env.example` to `.env.local` and set:
+   - `SCHEDULER_API_BASE_URL` (for example `http://127.0.0.1:3100`)
+   - `SCHEDULER_API_KEY` (must match `scheduler_war_api`)
+   - Legacy ClickHouse variables are no longer used by the dashboard runtime when API mode is enabled.
 3. Run the dev server:
    ```bash
    pnpm dev

@@ -1,5 +1,5 @@
 import PropAmmActivityChart from "@/components/slot-detail/prop-amm-activity-chart";
-import { fetchValidatorRecentSlotDetails } from "@/lib/queries";
+import { schedulerApiGet } from "@/lib/backend-api";
 import type { SlotDetail } from "@/lib/types";
 
 type PageProps = {
@@ -15,7 +15,21 @@ async function getValidatorData(validator: string): Promise<ValidatorData> {
   const trimmed = validator.trim();
   if (!trimmed) return { slots: [], error: null };
   try {
-    const slots = await fetchValidatorRecentSlotDetails(trimmed, 20);
+    const recentSlotsResult = await schedulerApiGet<{
+      slots: Array<{ slot: number }>;
+    }>(`/validators/${trimmed}/slots`, { limit: 20 });
+
+    const detailedSlots = await Promise.all(
+      recentSlotsResult.slots.map(async ({ slot }) => {
+        try {
+          return await schedulerApiGet<SlotDetail>(`/slots/${slot}`);
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const slots = detailedSlots.filter((detail): detail is SlotDetail => detail !== null);
     return { slots, error: null };
   } catch (error) {
     return {

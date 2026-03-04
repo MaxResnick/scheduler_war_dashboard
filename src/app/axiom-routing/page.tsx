@@ -1,168 +1,21 @@
 import AxiomRoutingClient from "@/components/axiom-routing/axiom-routing-client";
-import { fetchSlotLeaderSequence, AXIOM_TIP_ACCOUNTS } from "@/lib/queries";
-import { getAllValidators, getValidatorName } from "@/lib/validators-app";
-import type {
-  AxiomRoutingPayload,
-  LeaderTransition,
-  TransitionStats,
-  TimeRange,
-  SlotData
-} from "@/lib/types";
+import { schedulerApiGet } from "@/lib/backend-api";
+import type { AxiomRoutingPayload } from "@/lib/types";
 import Link from "next/link";
 
-// Only these scheduler types
-const ALLOWED_TYPES = new Set(["AgaveBam", "Frankendancer", "JitoLabs", "Harmonic", "Rakurai"]);
-
-function defaultTimeRange(hoursBack: number): TimeRange {
-  const to = new Date();
-  const from = new Date(to.getTime() - hoursBack * 60 * 60 * 1000);
-  return {
-    from: from.toISOString(),
-    to: to.toISOString()
-  };
-}
-
-async function fetchInitialData(): Promise<AxiomRoutingPayload> {
-  const range = defaultTimeRange(2);
-
-  const [slotSequence, allValidators] = await Promise.all([
-    fetchSlotLeaderSequence(range),
-    getAllValidators()
-  ]);
-
-  // Build validator type map, grouping Frankendancer Rev/Vanilla back to "Frankendancer"
-  const validatorTypeMap = new Map<string, string>();
-  for (const v of allValidators) {
-    const type = v.softwareClient.startsWith("Frankendancer") ? "Frankendancer" : v.softwareClient;
-    validatorTypeMap.set(v.account, type);
-  }
-
-  // Helper to get slot data with validator info
-  const getSlotData = (idx: number): SlotData | null => {
-    if (idx < 0 || idx >= slotSequence.length) return null;
-    const s = slotSequence[idx];
-    return {
-      slot: s.slot,
-      validator: s.validator,
-      validatorName: getValidatorName(s.validator),
-      validatorType: validatorTypeMap.get(s.validator) ?? "Unknown",
-      axiomTxCount: s.axiomTxCount,
-      totalTxCount: s.totalTxCount,
-      totalComputeUnits: s.totalComputeUnits
-    };
-  };
-
-  // Find ALL transitions between the 4 allowed types
-  const transitions: LeaderTransition[] = [];
-
-  for (let i = 0; i < slotSequence.length - 1; i++) {
-    const current = slotSequence[i];
-    const next = slotSequence[i + 1];
-
-    const currentType = validatorTypeMap.get(current.validator) ?? "Unknown";
-    const nextType = validatorTypeMap.get(next.validator) ?? "Unknown";
-
-    // Only include transitions between our 4 allowed types (and where type changes)
-    if (
-      ALLOWED_TYPES.has(currentType) &&
-      ALLOWED_TYPES.has(nextType) &&
-      currentType !== nextType
-    ) {
-      // Build 8-slot sequence
-      const slotSequenceWindow: SlotData[] = [];
-      for (let offset = -3; offset <= 4; offset++) {
-        const slotData = getSlotData(i + offset);
-        if (slotData) {
-          slotSequenceWindow.push(slotData);
-        }
-      }
-
-      transitions.push({
-        fromSlot: current.slot,
-        fromValidator: current.validator,
-        fromValidatorName: getValidatorName(current.validator),
-        fromValidatorType: currentType,
-        fromAxiomTxCount: current.axiomTxCount,
-        fromTotalTxCount: current.totalTxCount,
-        toSlot: next.slot,
-        toValidator: next.validator,
-        toValidatorName: getValidatorName(next.validator),
-        toValidatorType: nextType,
-        toAxiomTxCount: next.axiomTxCount,
-        toTotalTxCount: next.totalTxCount,
-        slotSequence: slotSequenceWindow
-      });
-    }
-  }
-
-  // Calculate stats by transition type
-  const statsByType = new Map<string, {
-    count: number;
-    totalFromAxiom: number;
-    totalToAxiom: number;
-    totalFromTotal: number;
-    totalToTotal: number;
-  }>();
-
-  for (const t of transitions) {
-    const key = `${t.fromValidatorType} → ${t.toValidatorType}`;
-    const existing = statsByType.get(key) ?? {
-      count: 0,
-      totalFromAxiom: 0,
-      totalToAxiom: 0,
-      totalFromTotal: 0,
-      totalToTotal: 0
-    };
-    existing.count++;
-    existing.totalFromAxiom += t.fromAxiomTxCount;
-    existing.totalToAxiom += t.toAxiomTxCount;
-    existing.totalFromTotal += t.fromTotalTxCount;
-    existing.totalToTotal += t.toTotalTxCount;
-    statsByType.set(key, existing);
-  }
-
-  const transitionStats: TransitionStats[] = Array.from(statsByType.entries())
-    .map(([type, stats]) => ({
-      transitionType: type,
-      count: stats.count,
-      avgBamAxiomTx: stats.count > 0 ? stats.totalFromAxiom / stats.count : 0,
-      avgFollowerAxiomTx: stats.count > 0 ? stats.totalToAxiom / stats.count : 0,
-      avgBamTotalTx: stats.count > 0 ? stats.totalFromTotal / stats.count : 0,
-      avgFollowerTotalTx: stats.count > 0 ? stats.totalToTotal / stats.count : 0,
-      axiomTxRatio: stats.totalFromAxiom > 0
-        ? stats.totalToAxiom / stats.totalFromAxiom
-        : stats.totalToAxiom > 0 ? Infinity : 1
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  // Calculate overall stats
-  const allowedSlots = slotSequence.filter(
-    s => ALLOWED_TYPES.has(validatorTypeMap.get(s.validator) ?? "Unknown")
-  );
-  const bamSlots = allowedSlots.filter(
-    s => (validatorTypeMap.get(s.validator) ?? "Unknown") === "AgaveBam"
-  );
-  const nonBamSlots = allowedSlots.filter(
-    s => (validatorTypeMap.get(s.validator) ?? "Unknown") !== "AgaveBam"
-  );
-
-  const totalBamSlots = bamSlots.length;
-  const totalAxiomTxOnBam = bamSlots.reduce((sum, s) => sum + s.axiomTxCount, 0);
-  const totalAxiomTxOnNonBam = nonBamSlots.reduce((sum, s) => sum + s.axiomTxCount, 0);
-
-  return {
-    range,
-    transitions,
-    transitionStats,
-    totalBamSlots,
-    totalAxiomTxOnBam,
-    avgAxiomTxPerBamSlot: totalBamSlots > 0 ? totalAxiomTxOnBam / totalBamSlots : 0,
-    avgAxiomTxPerNonBamSlot: nonBamSlots.length > 0 ? totalAxiomTxOnNonBam / nonBamSlots.length : 0
-  };
-}
+const DEFAULT_ACCOUNTS = [
+  "axmFmfqQwZGEUZeF3i3MqbRCDiGPfshtbdoBjk41k88",
+  "axmhpocX3hU7nT7KtsLBzNBR1Ur3HtU22Q5P313FREY",
+  "axmD4LFJopAcbRKCKsrrmovCZZzmKQCMEfs5qEXj8dG",
+  "axmWxBPqgRmcBN2cV12quqaQzsk16SazVXq8397KFKu",
+  "axmMdWvgEnN3NFrxMfTqUURzj9NLhZL2DkHkWCdgiFV",
+  "axmQTWU68qZ4fuG7zzkCXCBmxxeHVZrNrLkgxEFCbRv",
+  "axmYVq9b1ABYqtyizMtyfJppPTPxZGXPLctB3hV6W5b",
+  "axm2JQY1FKEktAwgXWqjGYkkWsWPfwKzgbnGVt5kiP4"
+] as const;
 
 export default async function AxiomRoutingPage() {
-  const initialData = await fetchInitialData();
+  const initialData = await schedulerApiGet<AxiomRoutingPayload>("/axiom-routing");
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
@@ -188,7 +41,7 @@ export default async function AxiomRoutingPage() {
         </p>
       </header>
 
-      <AxiomRoutingClient initialData={initialData} defaultAccounts={[...AXIOM_TIP_ACCOUNTS]} />
+      <AxiomRoutingClient initialData={initialData} defaultAccounts={[...DEFAULT_ACCOUNTS]} />
     </div>
   );
 }

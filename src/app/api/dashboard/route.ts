@@ -1,57 +1,23 @@
 import { NextResponse } from "next/server";
-
-import {
-  fetchBlockMetadata,
-  fetchBundleLandingSeries,
-  fetchEntryVolume,
-  fetchSlotStatusSummary,
-  fetchTransactionThroughput
-} from "@/lib/queries";
-
-function defaultTimeRange(hoursBack: number) {
-  const to = new Date();
-  const from = new Date(to.getTime() - hoursBack * 60 * 60 * 1000);
-  return {
-    from: from.toISOString(),
-    to: to.toISOString()
-  };
-}
+import { schedulerApiFetch } from "@/lib/backend-api";
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-
-  const from = url.searchParams.get("from");
-  const to = url.searchParams.get("to");
-  const range = from && to ? { from, to } : defaultTimeRange(6);
+  const search = new URL(request.url).search;
 
   try {
-    const [
-      bundles,
-      transactions,
-      entries,
-      slotStatus,
-      blockMetadata
-    ] = await Promise.all([
-      fetchBundleLandingSeries(range),
-      fetchTransactionThroughput(range),
-      fetchEntryVolume(range),
-      fetchSlotStatusSummary(range),
-      fetchBlockMetadata(range)
-    ]);
+    const upstream = await schedulerApiFetch(`/dashboard${search}`);
+    const payload = await upstream.json();
 
-    return NextResponse.json({
-      range,
-      bundles,
-      transactions,
-      entries,
-      slotStatus,
-      blockMetadata
-    });
+    if (payload && typeof payload === "object" && "meta" in payload) {
+      delete (payload as Record<string, unknown>).meta;
+    }
+
+    return NextResponse.json(payload, { status: upstream.status });
   } catch (error) {
-    console.error("[dashboard-api] Failed to load metrics", error);
+    console.error("[dashboard-api-proxy] Failed to reach scheduler API", error);
     return NextResponse.json(
       { error: "Unable to load dashboard metrics." },
-      { status: 500 }
+      { status: 502 }
     );
   }
 }

@@ -1,52 +1,23 @@
 import { NextResponse } from "next/server";
-import { getValidatorNames, searchValidators, getAllValidatorNames } from "@/lib/validators-app";
+import { schedulerApiFetch } from "@/lib/backend-api";
 
-/**
- * GET /api/validator-names
- *
- * Query params:
- * - accounts: Comma-separated list of validator accounts to look up
- * - search: Search query to find validators by name or address
- * - all: If "true", return all cached validator names (for client-side search)
- */
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const accountsParam = url.searchParams.get("accounts");
-  const searchQuery = url.searchParams.get("search");
-  const allParam = url.searchParams.get("all");
+  const search = new URL(request.url).search;
 
   try {
-    // Return all cached names for client-side use
-    if (allParam === "true") {
-      const allNames = getAllValidatorNames();
-      return NextResponse.json({ names: allNames });
+    const upstream = await schedulerApiFetch(`/validators/names${search}`);
+    const payload = await upstream.json();
+
+    if (payload && typeof payload === "object" && "meta" in payload) {
+      delete (payload as Record<string, unknown>).meta;
     }
 
-    // Search by name or address
-    if (searchQuery) {
-      const results = searchValidators(searchQuery, 20);
-      return NextResponse.json({ validators: results });
-    }
-
-    // Look up specific accounts
-    if (accountsParam) {
-      const accounts = accountsParam.split(",").map((a) => a.trim()).filter(Boolean);
-      if (accounts.length === 0) {
-        return NextResponse.json({ names: {} });
-      }
-
-      const namesMap = getValidatorNames(accounts);
-      const namesObject: Record<string, string | null> = {};
-      namesMap.forEach((name, account) => {
-        namesObject[account] = name;
-      });
-
-      return NextResponse.json({ names: namesObject });
-    }
-
-    return NextResponse.json({ error: "Provide 'accounts', 'search', or 'all=true' parameter" }, { status: 400 });
+    return NextResponse.json(payload, { status: upstream.status });
   } catch (error) {
-    console.error("[validator-names] Error:", error);
-    return NextResponse.json({ error: "Failed to fetch validator names" }, { status: 500 });
+    console.error("[validator-names-api-proxy] Failed to reach scheduler API", error);
+    return NextResponse.json(
+      { error: "Failed to fetch validator names" },
+      { status: 502 }
+    );
   }
 }

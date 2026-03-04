@@ -1,32 +1,20 @@
 import { NextResponse } from "next/server";
-import { getClickHouseClient } from "@/lib/clickhouse";
-
-const VALIDATOR_REGEX = /^[1-9A-HJ-NP-Za-km-z]{0,64}$/;
+import { schedulerApiFetch } from "@/lib/backend-api";
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const query = (url.searchParams.get("q") ?? "").trim();
-
-  if (!query || query.length < 2 || !VALIDATOR_REGEX.test(query)) {
-    return NextResponse.json({ validators: [] });
-  }
+  const search = new URL(request.url).search;
 
   try {
-    const client = getClickHouseClient();
+    const upstream = await schedulerApiFetch(`/validators/search${search}`);
+    const payload = await upstream.json();
 
-    const sql = `
-      SELECT DISTINCT base58Encode(validator_identity) AS validator
-      FROM bam.geyser_block_metadata
-      WHERE startsWith(base58Encode(validator_identity), '${query}')
-      LIMIT 20
-      FORMAT JSON
-    `;
+    if (payload && typeof payload === "object" && "meta" in payload) {
+      delete (payload as Record<string, unknown>).meta;
+    }
 
-    const rows = (await client.query(sql).toPromise()) as { validator: string }[];
-
-    return NextResponse.json({ validators: rows.map((r) => r.validator) });
+    return NextResponse.json(payload, { status: upstream.status });
   } catch (error) {
-    console.error("[validator-search] failed", error);
-    return NextResponse.json({ validators: [] }, { status: 500 });
+    console.error("[validator-search-api-proxy] Failed to reach scheduler API", error);
+    return NextResponse.json({ validators: [] }, { status: 502 });
   }
 }
