@@ -34,12 +34,6 @@ export default async function HomePage() {
             >
               Slot Lagging →
             </Link>
-            <Link
-              href="/axiom-routing"
-              className="rounded-lg bg-red-900/60 px-4 py-2 text-sm font-medium text-red-200 transition-colors hover:bg-red-800/60"
-            >
-              Axiom Routing →
-            </Link>
           </div>
         </div>
         <p className="max-w-2xl text-sm text-slate-300">

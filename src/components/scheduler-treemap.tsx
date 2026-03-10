@@ -31,15 +31,40 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "AgaveBam": "#7C3AED",
   "Agave": "#2C3316",
   "Jito Agave": "#5F288D",
+  "JitoLabs": "#5F288D",
   "Frankendancer": "#fb923c",
-  "Frankendancer Vanilla": "#fdba74", // orange-300
-  "Frankendancer Rev": "#ea580c", // orange-600
+  "Frankendancer Vanilla": "#fdba74",
+  "Frankendancer Rev": "#ea580c",
   "Firedancer": "#ef4444",
   "AgavePaladin": "#facc15",
-  "Harmonic": "#F5F2EB",
+  // Harmonic super-group: canonical + sub-variants
+  "Harmonic": "#F5F2EB",             // cream (generic / base)
+  "HarmonicAgave": "#C9B89A",        // warm tan
+  "HarmonicFrankendancer": "#E8C97A", // warm gold
+  "HarmonicFiredancer": "#A8D5BA",   // soft sage
   "Rakurai": "#06b6d4",
-  "Unknown": "#64748b", // Neutral gray for unidentified validators
+  "Unknown": "#64748b",
 };
+
+// Sub-clients that belong to the Harmonic super-group
+const HARMONIC_VARIANTS = new Set([
+  "Harmonic",
+  "HarmonicAgave",
+  "HarmonicFrankendancer",
+  "HarmonicFiredancer",
+]);
+
+// Sub-clients that belong to the Frankendancer super-group
+const FRANKENDANCER_VARIANTS = new Set([
+  "Frankendancer",
+  "Frankendancer Rev",
+]);
+
+function getCanonicalGroup(softwareClient: string): string {
+  if (HARMONIC_VARIANTS.has(softwareClient)) return "Harmonic";
+  if (FRANKENDANCER_VARIANTS.has(softwareClient)) return "Frankendancer";
+  return softwareClient;
+}
 
 // Rename labels for display
 function getDisplayName(softwareClient: string): string {
@@ -48,8 +73,7 @@ function getDisplayName(softwareClient: string): string {
 }
 
 function getColor(softwareClient: string): string {
-  const displayName = getDisplayName(softwareClient);
-  return SCHEDULER_COLORS[displayName] ?? "#64748b";
+  return SCHEDULER_COLORS[softwareClient] ?? SCHEDULER_COLORS[getDisplayName(softwareClient)] ?? "#64748b";
 }
 
 // Simple squarified treemap layout
@@ -327,16 +351,17 @@ export default function SchedulerTreemap({ validators }: Props) {
     const grouped = new Map<string, ValidatorData[]>();
 
     for (const v of validators) {
-      const existing = grouped.get(v.softwareClient) ?? [];
+      const canonical = getCanonicalGroup(v.softwareClient);
+      const existing = grouped.get(canonical) ?? [];
       existing.push(v);
-      grouped.set(v.softwareClient, existing);
+      grouped.set(canonical, existing);
     }
 
     return Array.from(grouped.entries())
-      .map(([softwareClient, validators]) => ({
+      .map(([softwareClient, vals]) => ({
         softwareClient,
-        validators,
-        totalStake: validators.reduce((sum, v) => sum + v.activeStake, 0),
+        validators: vals,
+        totalStake: vals.reduce((sum, v) => sum + v.activeStake, 0),
       }))
       .sort((a, b) => b.totalStake - a.totalStake);
   }, [validators]);
@@ -398,6 +423,9 @@ export default function SchedulerTreemap({ validators }: Props) {
             <span className="text-slate-300">{formatStake(highlightedValidator.activeStake)}</span>
             <span className="text-slate-400"> — </span>
             <span className="text-slate-300">{getDisplayName(highlightedValidator.softwareClient)}</span>
+            {getCanonicalGroup(highlightedValidator.softwareClient) !== highlightedValidator.softwareClient && (
+              <span className="text-slate-500"> ({getCanonicalGroup(highlightedValidator.softwareClient)} group)</span>
+            )}
           </div>
         )}
       </div>
@@ -550,64 +578,168 @@ export default function SchedulerTreemap({ validators }: Props) {
                 strokeWidth={2}
               />
 
-              {/* Validator nodes */}
-              {group.nodes.map((node) => {
-                const isHovered = hoveredValidator === node.validator.account;
-                const isHighlighted = isValidatorHighlighted(node.validator);
-                const minDimension = Math.min(node.width, node.height);
-                const showLabel = minDimension > 30;
+              {/* Pre-compute group label zone to suppress validator labels underneath */}
+              {(() => {
+                const showGroupLabel = group.width > 60 && group.height > 40;
+                const pct = ((group.totalStake / totalStake) * 100).toFixed(1);
+                const showPct = group.height > 70;
+                const nameFontSize = Math.min(15, Math.max(10, group.width / 10));
+                const pctFontSize = Math.min(22, Math.max(12, group.width / 7));
+                const blockHeight = showPct ? nameFontSize + pctFontSize + 6 : nameFontSize;
+                const cx = group.x + group.width / 2;
+                const cy = group.y + group.height / 2;
+                const nameY = cy - blockHeight / 2 + nameFontSize / 2;
+                const pctY = nameY + nameFontSize + 4 + pctFontSize / 2;
+                const labelZoneW = Math.min(group.width - 4, Math.max(nameFontSize * getDisplayName(group.softwareClient).length * 0.65, pctFontSize * (pct.length + 1) * 0.65) + 24);
+                const labelZoneH = blockHeight + 16;
+                const labelLeft = cx - labelZoneW / 2;
+                const labelTop = cy - labelZoneH / 2;
 
                 return (
-                  <g
-                    key={node.validator.account}
-                    onClick={() => handleValidatorClick(node.validator.account)}
-                    onMouseEnter={() => setHoveredValidator(node.validator.account)}
-                    onMouseLeave={() => setHoveredValidator(null)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <rect
-                      x={node.x}
-                      y={node.y}
-                      width={node.width}
-                      height={node.height}
-                      fill={isHighlighted ? "#38bdf8" : getColor(group.softwareClient)}
-                      fillOpacity={isHighlighted ? 1 : isHovered ? 0.9 : 0.7}
-                      stroke={isHighlighted ? "#fff" : isHovered ? "#fff" : getColor(group.softwareClient)}
-                      strokeWidth={isHighlighted ? 3 : isHovered ? 2 : 0.5}
-                    />
-                    {showLabel && (
-                      <text
-                        x={node.x + node.width / 2}
-                        y={node.y + node.height / 2}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-white text-[9px] font-medium pointer-events-none"
-                        style={{
-                          textShadow: "0 1px 2px rgba(0,0,0,0.8)",
-                        }}
-                        suppressHydrationWarning
-                      >
-                        {node.validator.name
-                          ? node.validator.name.slice(0, Math.floor(node.width / 6))
-                          : node.validator.account.slice(0, 4)}
-                      </text>
-                    )}
-                    <title suppressHydrationWarning>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(group.softwareClient)}\nClick to view recent slots`}</title>
-                  </g>
-                );
-              })}
+                  <>
+                    {/* Validator nodes */}
+                    {group.nodes.map((node) => {
+                      const isHovered = hoveredValidator === node.validator.account;
+                      const isHighlighted = isValidatorHighlighted(node.validator);
+                      const minDimension = Math.min(node.width, node.height);
+                      const nodeCx = node.x + node.width / 2;
+                      const nodeCy = node.y + node.height / 2;
+                      const insideLabelZone = showGroupLabel &&
+                        nodeCx >= labelLeft && nodeCx <= labelLeft + labelZoneW &&
+                        nodeCy >= labelTop && nodeCy <= labelTop + labelZoneH;
+                      const showLabel = minDimension > 30 && !insideLabelZone;
 
-              {/* Group label */}
-              {group.width > 100 && group.height > 40 && (
-                <text
-                  x={group.x + 8}
-                  y={group.y + 20}
-                  className="fill-white text-sm font-bold pointer-events-none"
-                  style={{ textShadow: "0 1px 3px rgba(0,0,0,0.9)" }}
-                >
-                  {getDisplayName(group.softwareClient)}
-                </text>
-              )}
+                      return (
+                        <g
+                          key={node.validator.account}
+                          onClick={() => handleValidatorClick(node.validator.account)}
+                          onMouseEnter={() => setHoveredValidator(node.validator.account)}
+                          onMouseLeave={() => setHoveredValidator(null)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <rect
+                            x={node.x}
+                            y={node.y}
+                            width={node.width}
+                            height={node.height}
+                            fill={isHighlighted ? "#38bdf8" : getColor(node.validator.softwareClient)}
+                            fillOpacity={isHighlighted ? 1 : isHovered ? 0.9 : 0.7}
+                            stroke={isHighlighted ? "#fff" : isHovered ? "#fff" : getColor(node.validator.softwareClient)}
+                            strokeWidth={isHighlighted ? 3 : isHovered ? 2 : 0.5}
+                          />
+                          {showLabel && (
+                            <text
+                              x={nodeCx}
+                              y={nodeCy}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              className="fill-white text-[9px] font-medium pointer-events-none"
+                              style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
+                              suppressHydrationWarning
+                            >
+                              {node.validator.name
+                                ? node.validator.name.slice(0, Math.floor(node.width / 6))
+                                : node.validator.account.slice(0, 4)}
+                            </text>
+                          )}
+                          <title suppressHydrationWarning>{`${node.validator.name || node.validator.account}\nStake: ${formatStake(node.validator.activeStake)}\nClient: ${getDisplayName(node.validator.softwareClient)}\nClick to view recent slots`}</title>
+                        </g>
+                      );
+                    })}
+
+                    {/* Group label */}
+                    {showGroupLabel && (
+                      <g className="pointer-events-none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
+                        <text
+                          x={cx}
+                          y={nameY}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="white"
+                          fontWeight="600"
+                          style={{ fontSize: nameFontSize }}
+                        >
+                          {getDisplayName(group.softwareClient)}
+                        </text>
+                        {showPct && (
+                          <text
+                            x={cx}
+                            y={pctY}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="white"
+                            fontWeight="700"
+                            style={{ fontSize: pctFontSize }}
+                          >
+                            {pct}%
+                          </text>
+                        )}
+                        {/* Sub-variant legend for super-groups (e.g. Harmonic, Frankendancer) */}
+                        {(() => {
+                          const subVariants = Array.from(
+                            new Set(group.validators.map(v => v.softwareClient))
+                          ).filter(c => c !== group.softwareClient);
+                          if (subVariants.length === 0 || group.height < 110) return null;
+                          const allVariants = [group.softwareClient, ...subVariants];
+                          const dotSize = 9;
+                          const legendFontSize = 11;
+                          const rowHeight = dotSize + 8;
+                          const pad = 8;
+                          const legendStartY = (showPct ? pctY + pctFontSize / 2 : nameY + nameFontSize / 2) + 14;
+                          // Clamp so legend doesn't overflow group bottom
+                          const availableH = group.y + group.height - legendStartY - 6;
+                          if (availableH < rowHeight) return null;
+                          const visibleVariants = allVariants.slice(0, Math.floor(availableH / rowHeight));
+                          const maxLabelW = Math.max(...visibleVariants.map(c => getDisplayName(c).length * legendFontSize * 0.58));
+                          const bgW = dotSize + 6 + maxLabelW + pad * 2;
+                          const bgH = visibleVariants.length * rowHeight + pad;
+                          const bgX = cx - bgW / 2;
+                          const bgY = legendStartY - pad / 2;
+                          return (
+                            <g>
+                              <rect
+                                x={bgX}
+                                y={bgY}
+                                width={bgW}
+                                height={bgH}
+                                rx={5}
+                                fill="rgba(15,23,42,0.72)"
+                              />
+                              {visibleVariants.map((variant, i) => {
+                                const rowY = legendStartY + i * rowHeight + rowHeight / 2 - 2;
+                                const dotX = bgX + pad;
+                                const textX = dotX + dotSize + 6;
+                                return (
+                                  <g key={variant}>
+                                    <rect
+                                      x={dotX}
+                                      y={rowY - dotSize / 2}
+                                      width={dotSize}
+                                      height={dotSize}
+                                      rx={2}
+                                      fill={getColor(variant)}
+                                    />
+                                    <text
+                                      x={textX}
+                                      y={rowY}
+                                      dominantBaseline="middle"
+                                      fill="rgba(255,255,255,0.95)"
+                                      fontWeight="600"
+                                      style={{ fontSize: legendFontSize }}
+                                    >
+                                      {getDisplayName(variant)}
+                                    </text>
+                                  </g>
+                                );
+                              })}
+                            </g>
+                          );
+                        })()}
+                      </g>
+                    )}
+                  </>
+                );
+              })()}
             </g>
           ))}
         </svg>
