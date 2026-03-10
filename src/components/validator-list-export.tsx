@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ValidatorData } from "@/lib/validators-app";
+import type { ValidatorData } from "@/lib/types";
 
 type ExportFormat = "json" | "csv";
 

@@ -3,6 +3,13 @@ export type TimeRange = {
   to: string;
 };
 
+export type ValidatorData = {
+  account: string;
+  name: string | null;
+  activeStake: number;
+  softwareClient: string;
+};
+
 export type BundleLandingPoint = {
   windowStart: string;
   bundleCount: number;

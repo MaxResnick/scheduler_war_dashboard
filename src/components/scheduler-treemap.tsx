@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { ValidatorData } from "@/lib/validators-app";
+import type { ValidatorData } from "@/lib/types";
 
 type Props = {
   validators: ValidatorData[];
