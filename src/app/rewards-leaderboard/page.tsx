@@ -4,9 +4,15 @@ import Link from "next/link";
 type LeaderboardEntry = {
   rank: number;
   validator: string;
-  validatorName: string;
-  totalRewards: number;
+  validatorName: string | null;
+  softwareClient: string;
   blockCount: number;
+  totalValidatorRewardSol: number;
+  totalTipsSol: number;
+  totalFeeSol: number;
+  totalTxCount: number;
+  totalNonVoteTxCount: number;
+  totalCuConsumed: number;
 };
 
 type RewardsResponse = {
@@ -22,8 +28,8 @@ type PageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
 
-function formatSol(lamports: number): string {
-  return (lamports / 1e9).toLocaleString(undefined, {
+function formatSol(sol: number): string {
+  return sol.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -54,7 +60,7 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
     error = err instanceof Error ? err.message : "Failed to load rewards data";
   }
 
-  const totalRewards = data?.leaderboard.reduce((sum, e) => sum + e.totalRewards, 0) ?? 0;
+  const totalRewards = data?.leaderboard.reduce((sum, e) => sum + e.totalValidatorRewardSol, 0) ?? 0;
   const totalBlocks = data?.leaderboard.reduce((sum, e) => sum + e.blockCount, 0) ?? 0;
 
   return (
@@ -157,7 +163,10 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                   <tr>
                     <th className="px-4 py-3 text-right w-16">Rank</th>
                     <th className="px-4 py-3">Validator</th>
-                    <th className="px-4 py-3 text-right">Total Rewards</th>
+                    <th className="px-4 py-3">Client</th>
+                    <th className="px-4 py-3 text-right">Validator Rewards</th>
+                    <th className="px-4 py-3 text-right">Tips</th>
+                    <th className="px-4 py-3 text-right">Fees</th>
                     <th className="px-4 py-3 text-right">Blocks</th>
                     <th className="px-4 py-3 text-right">Avg / Block</th>
                   </tr>
@@ -180,15 +189,22 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                           )}
                         </div>
                       </td>
+                      <td className="px-4 py-3 text-slate-300">{entry.softwareClient}</td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatSol(entry.totalRewards)} SOL
+                        {formatSol(entry.totalValidatorRewardSol)} SOL
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatSol(entry.totalTipsSol)} SOL
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatSol(entry.totalFeeSol)} SOL
                       </td>
                       <td className="px-4 py-3 text-right">
                         {entry.blockCount.toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-right font-mono text-slate-400">
                         {entry.blockCount > 0
-                          ? formatSol(Math.round(entry.totalRewards / entry.blockCount))
+                          ? formatSol(entry.totalValidatorRewardSol / entry.blockCount)
                           : "\u2014"}
                       </td>
                     </tr>
