@@ -241,8 +241,9 @@ async function main() {
   const client = getClickHouseClient();
   const classifications: Record<string, Classification> = {};
 
-  // Run classifications in parallel batches of 10
-  const BATCH_SIZE = 10;
+  // Run classifications in parallel batches of 3 (ClickHouse has 12 concurrent query limit,
+  // each validator uses up to 3 parallel sub-queries per slot)
+  const BATCH_SIZE = 3;
   for (let i = 0; i < frankendancerValidators.length; i += BATCH_SIZE) {
     const batch = frankendancerValidators.slice(i, i + BATCH_SIZE);
     const results = await Promise.all(
