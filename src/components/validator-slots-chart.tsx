@@ -140,7 +140,9 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (matchingValidators[highlightedIndex]) {
-        handleSelectValidator(matchingValidators[highlightedIndex].validator_address);
+        const addr = matchingValidators[highlightedIndex].validator_address;
+        handleSelectValidator(addr);
+        handleBarClick(addr);
       }
     } else if (e.key === "Escape") {
       setShowDropdown(false);

@@ -411,6 +411,11 @@ export default function SchedulerTreemap({ validators }: Props) {
           placeholder="Search by validator name or address..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && highlightedValidator) {
+              handleValidatorClick(highlightedValidator.account);
+            }
+          }}
           className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
         />
         {highlightedValidator && (

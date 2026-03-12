@@ -1,17 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import cachedValidatorData from "../../data/validator-names.json";
-
-// Type for cached data
-type CachedValidatorNames = {
-  generatedAt: string;
-  count: number;
-  names: Record<string, string>;
-};
-
-const validatorNamesData = cachedValidatorData as CachedValidatorNames;
 
 type SlotSearchProps = {
   currentSlot?: number;
@@ -27,35 +17,39 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [suggestions, setSuggestions] = useState<ValidatorSuggestion[]>([]);
   const router = useRouter();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Check if input looks like a slot number
   const isSlotNumber = /^\d+$/.test(inputValue.trim());
 
-  // Search validators locally from cached data
-  const suggestions = useMemo((): ValidatorSuggestion[] => {
-    const q = inputValue.trim().toLowerCase();
+  // Search validators via API with debounce
+  useEffect(() => {
+    const q = inputValue.trim();
 
-    // Don't search if it's a slot number or too short
     if (isSlotNumber || q.length < 2) {
-      return [];
+      setSuggestions([]);
+      return;
     }
 
-    const results: ValidatorSuggestion[] = [];
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    for (const [account, name] of Object.entries(validatorNamesData.names)) {
-      const nameMatches = name.toLowerCase().includes(q);
-      const accountMatches = account.toLowerCase().startsWith(q);
-
-      if (nameMatches || accountMatches) {
-        results.push({ address: account, name });
-        if (results.length >= 10) {
-          break;
-        }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/validator-search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const results = (data.validators ?? data) as { account: string; name: string | null }[];
+        setSuggestions(results.map((r) => ({ address: r.account, name: r.name })));
+      } catch {
+        setSuggestions([]);
       }
-    }
+    }, 200);
 
-    return results;
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [inputValue, isSlotNumber]);
 
   // Reset highlighted index when suggestions change

@@ -6,10 +6,10 @@ export default async function SlotLaggingPage() {
   const [laggingResult, allValidatorsResult, namesResult] = await Promise.all([
     schedulerApiGet<{
       data: Array<{
-        validator_address: string;
-        avg_slot_time_ms: number;
-        slot_count: number;
-        block_count: number;
+        validatorAddress: string;
+        avgSlotTimeMs: number;
+        slotCount: number;
+        blockCount: number;
       }>;
     }>("/slot-lagging", { hours: 4 }),
     schedulerApiGet<{
@@ -17,7 +17,12 @@ export default async function SlotLaggingPage() {
     }>("/validators", { includeStake: "true" }),
     schedulerApiGet<{ names: Record<string, string> }>("/validators/names", { all: "true" })
   ]);
-  const validators = laggingResult.data;
+  const validators = laggingResult.data.map((r) => ({
+    validator_address: r.validatorAddress,
+    avg_slot_time_ms: r.avgSlotTimeMs,
+    slot_count: r.slotCount,
+    block_count: r.blockCount,
+  }));
   const validatorNames = namesResult.names;
 
   // Build a map of validator address -> softwareClient for coloring
