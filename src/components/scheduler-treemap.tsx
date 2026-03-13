@@ -313,6 +313,7 @@ function formatStake(lamports: number): string {
 
 export default function SchedulerTreemap({ validators }: Props) {
   const [hoveredValidator, setHoveredValidator] = useState<string | null>(null);
+  const [loadingValidator, setLoadingValidator] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [containerWidth, setContainerWidth] = useState(1200);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -377,18 +378,32 @@ export default function SchedulerTreemap({ validators }: Props) {
   );
 
   const handleValidatorClick = async (address: string) => {
+    if (loadingValidator) return;
+    setLoadingValidator(address);
+    let didNavigate = false;
+
     try {
       const res = await fetch(`/api/validator-slots/${address}`);
       if (!res.ok) throw new Error("Failed to fetch slots");
       const data = await res.json();
       const slots = data.slots as { slot: number }[];
       if (slots.length > 4) {
+        didNavigate = true;
         router.push(`/slot/${slots[4].slot}`);
       } else if (slots.length > 0) {
+        didNavigate = true;
         router.push(`/slot/${slots[0].slot}`);
+      } else {
+        didNavigate = true;
+        router.push("/slot");
       }
     } catch {
-      // Fallback: navigate to the first slot page without a specific slot
+      didNavigate = true;
+      router.push("/slot");
+    } finally {
+      if (!didNavigate) {
+        setLoadingValidator(null);
+      }
     }
   };
 
@@ -567,7 +582,12 @@ export default function SchedulerTreemap({ validators }: Props) {
       })()}
 
       {/* Treemap */}
-      <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
+      <div className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
+        {loadingValidator && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/20">
+            <span className="h-12 w-12 animate-spin rounded-full border-[3px] border-slate-300/85 border-t-transparent" />
+          </div>
+        )}
         <svg width={width} height={height} className="block">
           {groupNodes.map((group) => (
             <g key={group.softwareClient}>

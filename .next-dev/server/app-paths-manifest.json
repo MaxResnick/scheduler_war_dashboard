@@ -1,0 +1,5 @@
+{
+  "/page": "app/page.js",
+  "/api/validator-slots/[validator]/route": "app/api/validator-slots/[validator]/route.js",
+  "/slot/[slot]/page": "app/slot/[slot]/page.js"
+}
