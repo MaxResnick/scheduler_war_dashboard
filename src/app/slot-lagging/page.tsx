@@ -34,7 +34,7 @@ export default async function SlotLaggingPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       <header className="space-y-2">
-        <p className="text-sm uppercase tracking-wide text-slate-400">
+        <p className="text-sm uppercase tracking-wide text-anza-green-muted">
           Solana Scheduler War
         </p>
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -42,19 +42,19 @@ export default async function SlotLaggingPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/"
-              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="rounded-lg bg-anza-surface-alt px-4 py-2 text-sm font-medium text-anza-green transition-colors hover:bg-anza-border"
             >
               ← Home
             </Link>
             <Link
               href="/slot"
-              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="rounded-lg bg-anza-surface-alt px-4 py-2 text-sm font-medium text-anza-green transition-colors hover:bg-anza-border"
             >
               Slot Detail →
             </Link>
           </div>
         </div>
-        <p className="max-w-2xl text-sm text-slate-300">
+        <p className="max-w-2xl text-sm text-anza-green-mid">
           Validators ranked by average time between consecutive leader slots (FirstShredReceived).
           Slower validators at the top. Uses 4-hour window. Colored by scheduler type.
           Excludes transition slots (first slot of each 4-slot leader window) to avoid cross-validator timing variance.

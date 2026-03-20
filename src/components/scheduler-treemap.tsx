@@ -409,8 +409,8 @@ export default function SchedulerTreemap({ validators }: Props) {
 
   if (validators.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-8 text-center">
-        <p className="text-slate-400">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-8 text-center">
+        <p className="text-anza-green-muted">
           No validator data available. Run the fetch script with VALIDATORS_APP_API_TOKEN to populate data.
         </p>
       </div>
@@ -431,20 +431,20 @@ export default function SchedulerTreemap({ validators }: Props) {
               handleValidatorClick(highlightedValidator.account);
             }
           }}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          className="w-full rounded-lg border border-anza-border bg-anza-surface px-4 py-3 text-sm text-anza-green placeholder-anza-green-subtle focus:border-anza-green focus:outline-none focus:ring-1 focus:ring-anza-green"
         />
         {highlightedValidator && (
           <div className="text-sm">
-            <span className="text-slate-400">Found: </span>
-            <span className="font-medium text-sky-400">
+            <span className="text-anza-green-muted">Found: </span>
+            <span className="font-medium text-anza-green-mid">
               {highlightedValidator.name || highlightedValidator.account}
             </span>
-            <span className="text-slate-400"> — </span>
-            <span className="text-slate-300">{formatStake(highlightedValidator.activeStake)}</span>
-            <span className="text-slate-400"> — </span>
-            <span className="text-slate-300">{getDisplayName(highlightedValidator.softwareClient)}</span>
+            <span className="text-anza-green-muted"> — </span>
+            <span className="text-anza-green-mid">{formatStake(highlightedValidator.activeStake)}</span>
+            <span className="text-anza-green-muted"> — </span>
+            <span className="text-anza-green-mid">{getDisplayName(highlightedValidator.softwareClient)}</span>
             {getCanonicalGroup(highlightedValidator.softwareClient) !== highlightedValidator.softwareClient && (
-              <span className="text-slate-500"> ({getCanonicalGroup(highlightedValidator.softwareClient)} group)</span>
+              <span className="text-anza-green-subtle"> ({getCanonicalGroup(highlightedValidator.softwareClient)} group)</span>
             )}
           </div>
         )}
@@ -465,7 +465,7 @@ export default function SchedulerTreemap({ validators }: Props) {
         const bamPercent = totalStake > 0 ? (bamStake / totalStake) * 100 : 0;
 
         return (
-          <div className="relative overflow-hidden rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+          <div className="relative overflow-hidden rounded-xl border border-anza-border bg-anza-surface/80 p-4">
             {/* Animated background glow */}
             <div className="absolute inset-0 opacity-30">
               <div
@@ -480,7 +480,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                 className="absolute right-0 top-0 h-full animate-pulse"
                 style={{
                   width: `${harmonicBarPercent}%`,
-                  background: "linear-gradient(270deg, #F5F2EB 0%, #e8e4d9 50%, transparent 100%)",
+                  background: "linear-gradient(270deg, #a8a280 0%, #b8b290 50%, transparent 100%)",
                   filter: "blur(20px)",
                   animationDelay: "0.5s"
                 }}
@@ -489,7 +489,7 @@ export default function SchedulerTreemap({ validators }: Props) {
 
             {/* Title */}
             <div className="relative mb-3 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-widest text-anza-green-muted">
                 ⚔️ Scheduler War ⚔️
               </span>
             </div>
@@ -499,25 +499,25 @@ export default function SchedulerTreemap({ validators }: Props) {
               {/* Labels */}
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-violet-400" style={{ textShadow: "0 0 10px #7C3AED" }}>
+                  <span className="text-lg font-bold text-violet-600">
                     BAM
                   </span>
-                  <span className="text-sm text-violet-400/80">
+                  <span className="text-sm text-violet-600/80">
                     {formatStake(bamStake)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm" style={{ color: "rgba(245,242,235,0.8)" }}>
+                  <span className="text-sm text-anza-green-muted">
                     {formatStake(harmonicStake)}
                   </span>
-                  <span className="text-lg font-bold" style={{ color: "#F5F2EB", textShadow: "0 0 10px rgba(245,242,235,0.5)" }}>
+                  <span className="text-lg font-bold text-anza-green">
                     Harmonic
                   </span>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="relative h-8 overflow-hidden rounded-full bg-slate-800">
+              <div className="relative h-8 overflow-hidden rounded-full bg-anza-border/40">
                 {/* BAM side */}
                 <div
                   className="absolute left-0 top-0 h-full transition-all duration-1000"
@@ -542,8 +542,8 @@ export default function SchedulerTreemap({ validators }: Props) {
                   className="absolute right-0 top-0 h-full transition-all duration-1000"
                   style={{
                     width: `${harmonicBarPercent}%`,
-                    background: "linear-gradient(270deg, #F5F2EB 0%, #e8e4d9 70%, #dbd6c9 100%)",
-                    boxShadow: "0 0 20px rgba(245,242,235,0.5), inset 0 2px 4px rgba(255,255,255,0.5)"
+                    background: "linear-gradient(270deg, #a8a280 0%, #b8b290 70%, #c8c2a0 100%)",
+                    boxShadow: "0 0 20px rgba(168,162,128,0.5), inset 0 2px 4px rgba(255,255,255,0.3)"
                   }}
                 >
                   {/* Shimmer effect */}
@@ -563,7 +563,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                   style={{ left: `${bamBarPercent}%` }}
                 >
                   <div
-                    className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-slate-900 text-xs font-black text-white"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-anza-green text-xs font-black text-white"
                     style={{ boxShadow: "0 0 15px rgba(255,255,255,0.5)" }}
                   >
                     VS
@@ -573,8 +573,8 @@ export default function SchedulerTreemap({ validators }: Props) {
 
               {/* Percentage labels */}
               <div className="mt-2 flex items-center justify-between text-sm font-bold">
-                <span className="text-violet-400">{bamPercent.toFixed(1)}%</span>
-                <span style={{ color: "#F5F2EB" }}>{harmonicPercent.toFixed(1)}%</span>
+                <span className="text-violet-600">{bamPercent.toFixed(1)}%</span>
+                <span className="text-anza-green">{harmonicPercent.toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -582,10 +582,10 @@ export default function SchedulerTreemap({ validators }: Props) {
       })()}
 
       {/* Treemap */}
-      <div className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
+      <div className="relative overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
         {loadingValidator && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/20">
-            <span className="h-12 w-12 animate-spin rounded-full border-[3px] border-slate-300/85 border-t-transparent" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-anza-bg/20">
+            <span className="h-12 w-12 animate-spin rounded-full border-[3px] border-anza-green/85 border-t-transparent" />
           </div>
         )}
         <svg width={width} height={height} className="block">
@@ -647,7 +647,7 @@ export default function SchedulerTreemap({ validators }: Props) {
                             y={node.y}
                             width={node.width}
                             height={node.height}
-                            fill={isHighlighted ? "#38bdf8" : getColor(node.validator.softwareClient)}
+                            fill={isHighlighted ? "#f59e0b" : getColor(node.validator.softwareClient)}
                             fillOpacity={isHighlighted ? 1 : isHovered ? 0.9 : 0.7}
                             stroke={isHighlighted ? "#fff" : isHovered ? "#fff" : getColor(node.validator.softwareClient)}
                             strokeWidth={isHighlighted ? 3 : isHovered ? 2 : 0.5}
@@ -772,20 +772,20 @@ export default function SchedulerTreemap({ validators }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <p className="text-sm text-slate-400">Total Validators</p>
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+          <p className="text-sm text-anza-green-muted">Total Validators</p>
           <p className="text-2xl font-semibold">{validators.length.toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <p className="text-sm text-slate-400">Total Stake</p>
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+          <p className="text-sm text-anza-green-muted">Total Stake</p>
           <p className="text-2xl font-semibold">{formatStake(totalStake)}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <p className="text-sm text-slate-400">Scheduler Types</p>
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+          <p className="text-sm text-anza-green-muted">Scheduler Types</p>
           <p className="text-2xl font-semibold">{groups.length}</p>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <p className="text-sm text-slate-400">Largest Type</p>
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+          <p className="text-sm text-anza-green-muted">Largest Type</p>
           <p className="text-2xl font-semibold">{groups[0] ? getDisplayName(groups[0].softwareClient) : "—"}</p>
         </div>
       </div>

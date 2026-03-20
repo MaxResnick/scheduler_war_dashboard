@@ -216,11 +216,11 @@ export default function PropAmmActivityChart({
     }${validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}`;
 
   return (
-    <div className={`overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-6 ${containerClassName ?? ""}`}>
+    <div className={`overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6 ${containerClassName ?? ""}`}>
       {!hideHeader && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold">{headerTitle}</h3>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-anza-green-muted">
             {headerSubtitleBase}
             {validatorClient && (
               <>
@@ -233,9 +233,9 @@ export default function PropAmmActivityChart({
       )}
 
       {/* Tracked Accounts Table */}
-      <div className="mb-6 overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50">
+      <div className="mb-6 overflow-hidden rounded-lg border border-anza-border bg-anza-surface-alt">
         <table className="w-full text-sm">
-          <thead className="bg-slate-800/80 text-xs text-slate-400">
+          <thead className="bg-anza-surface-alt text-xs text-anza-green-muted">
             <tr>
               <th className="px-3 py-2 text-left">Color</th>
               <th className="px-3 py-2 text-left">Label</th>
@@ -245,13 +245,13 @@ export default function PropAmmActivityChart({
           </thead>
           <tbody>
             {trackedAccounts.map((acct) => (
-              <tr key={acct.account} className="border-t border-slate-700">
+              <tr key={acct.account} className="border-t border-anza-border">
                 <td className="px-3 py-2">
                   <input
                     type="color"
                     value={acct.color}
                     onChange={(e) => handleColorChange(acct.account, e.target.value)}
-                    className="h-6 w-8 cursor-pointer rounded border border-slate-600 bg-transparent"
+                    className="h-6 w-8 cursor-pointer rounded border border-anza-border bg-transparent"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -259,18 +259,18 @@ export default function PropAmmActivityChart({
                     type="text"
                     value={acct.label}
                     onChange={(e) => handleLabelChange(acct.account, e.target.value)}
-                    className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 text-sm text-slate-200 focus:border-sky-500 focus:outline-none"
+                    className="w-full rounded border border-anza-border bg-anza-surface px-2 py-1 text-sm text-anza-green focus:border-anza-green focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2">
-                  <code className="text-xs text-slate-400">
+                  <code className="text-xs text-anza-green-muted">
                     {acct.account.slice(0, 8)}...{acct.account.slice(-8)}
                   </code>
                 </td>
                 <td className="px-3 py-2 text-right">
                   <button
                     onClick={() => handleRemoveAccount(acct.account)}
-                    className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-red-400"
+                    className="rounded px-2 py-1 text-xs text-anza-green-muted hover:bg-anza-surface-alt hover:text-red-600"
                   >
                     Remove
                   </button>
@@ -278,13 +278,13 @@ export default function PropAmmActivityChart({
               </tr>
             ))}
             {/* Add new account row */}
-            <tr className="border-t border-slate-700 bg-slate-800/30">
+            <tr className="border-t border-anza-border bg-anza-surface-alt">
               <td className="px-3 py-2">
                 <input
                   type="color"
                   value={newColor}
                   onChange={(e) => setNewColor(e.target.value)}
-                  className="h-6 w-8 cursor-pointer rounded border border-slate-600 bg-transparent"
+                  className="h-6 w-8 cursor-pointer rounded border border-anza-border bg-transparent"
                 />
               </td>
               <td className="px-3 py-2">
@@ -293,7 +293,7 @@ export default function PropAmmActivityChart({
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Label (optional)"
-                  className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+                  className="w-full rounded border border-anza-border bg-anza-surface px-2 py-1 text-sm text-anza-green placeholder-anza-green-subtle focus:border-anza-green focus:outline-none"
                 />
               </td>
               <td className="px-3 py-2">
@@ -302,14 +302,14 @@ export default function PropAmmActivityChart({
                   value={newAddress}
                   onChange={(e) => setNewAddress(e.target.value)}
                   placeholder="Account address..."
-                  className="w-full rounded border border-slate-600 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none"
+                  className="w-full rounded border border-anza-border bg-anza-surface px-2 py-1 font-mono text-xs text-anza-green placeholder-anza-green-subtle focus:border-anza-green focus:outline-none"
                 />
               </td>
               <td className="px-3 py-2 text-right">
                 <button
                   onClick={handleAddAccount}
                   disabled={!newAddress.trim()}
-                  className="rounded bg-sky-600 px-3 py-1 text-xs text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded bg-anza-green px-3 py-1 text-xs text-white hover:bg-anza-green-dark disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Add
                 </button>
@@ -321,7 +321,7 @@ export default function PropAmmActivityChart({
         {/* Quick suggestions */}
         {suggestedAccounts.length > 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-xs">
-            <span className="text-slate-500">Quick add:</span>
+            <span className="text-anza-green-subtle">Quick add:</span>
             {suggestedAccounts.slice(0, 3).map((s) => (
               <button
                 key={s.account}
@@ -336,9 +336,9 @@ export default function PropAmmActivityChart({
                     }
                   ]);
                 }}
-                className="rounded border border-slate-600 bg-slate-800 px-2 py-1 font-mono text-slate-400 hover:border-sky-500 hover:text-sky-400"
+                className="rounded border border-anza-border bg-anza-surface-alt px-2 py-1 font-mono text-anza-green-muted hover:border-anza-green hover:text-anza-green-mid"
               >
-                {s.account.slice(0, 4)}...{s.account.slice(-4)} <span className="text-slate-600">({s.count})</span>
+                {s.account.slice(0, 4)}...{s.account.slice(-4)} <span className="text-anza-green-subtle">({s.count})</span>
               </button>
             ))}
           </div>
@@ -366,7 +366,7 @@ export default function PropAmmActivityChart({
                   x={-16}
                   y={y + 4}
                   textAnchor="end"
-                  className="fill-slate-100 text-sm"
+                  className="fill-anza-green text-sm"
                 >
                   {acct.label}
                 </text>
@@ -437,7 +437,7 @@ export default function PropAmmActivityChart({
                   stroke="rgb(148, 163, 184)"
                   strokeWidth={1}
                 />
-                <text x={x} y={plotHeight + 22} textAnchor="middle" className="fill-slate-400 text-xs">
+                <text x={x} y={plotHeight + 22} textAnchor="middle" className="fill-anza-green-muted text-xs">
                   {tick}
                 </text>
               </g>
@@ -448,7 +448,7 @@ export default function PropAmmActivityChart({
             x={plotWidth / 2}
             y={plotHeight + 44}
             textAnchor="middle"
-            className="fill-slate-300 text-sm"
+            className="fill-anza-green-mid text-sm"
           >
             PoH Tick (#)
           </text>
@@ -456,7 +456,7 @@ export default function PropAmmActivityChart({
       </svg>
 
       {propTransactions.length === 0 && (
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-anza-green-muted">
           No matching transactions landed in this slot.
         </p>
       )}

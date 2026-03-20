@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light theme (default) ── */
+:root {
+  --anza-bg: 248 246 240;           /* #f8f6f0 */
+  --anza-surface: 240 237 229;      /* #f0ede5 */
+  --anza-surface-alt: 229 223 210;  /* #e5dfd2 */
+  --anza-border: 203 196 175;       /* #cbc4af */
+  --anza-green: 28 36 0;            /* #1c2400 */
+  --anza-green-dark: 14 19 0;       /* #0e1300 */
+  --anza-green-mid: 59 80 0;        /* #3b5000 */
+  --anza-green-muted: 94 114 0;     /* #5e7200 */
+  --anza-green-subtle: 143 160 80;  /* #8fa050 */
+}
+
+/* ── Dark theme ── */
+.dark {
+  --anza-bg: 22 28 4;               /* very dark olive */
+  --anza-surface: 32 40 10;         /* slightly lighter */
+  --anza-surface-alt: 42 52 16;     /* card hover / alt */
+  --anza-border: 58 72 28;          /* olive border */
+  --anza-green: 240 237 229;        /* cream text */
+  --anza-green-dark: 248 246 240;   /* brighter cream */
+  --anza-green-mid: 210 205 190;    /* secondary text */
+  --anza-green-muted: 160 155 120;  /* muted text */
+  --anza-green-subtle: 110 108 76;  /* subtle text */
+}
+
 body {
-  @apply bg-slate-950 text-slate-100;
+  @apply bg-anza-bg text-anza-green;
+  transition: background-color 0.2s, color 0.2s;
 }

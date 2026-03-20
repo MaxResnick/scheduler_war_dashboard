@@ -172,43 +172,43 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       <header className="space-y-2">
-        <p className="text-sm uppercase tracking-wide text-slate-400">
+        <p className="text-sm uppercase tracking-wide text-anza-green-muted">
           Prop AMM analysis
         </p>
         <h1 className="text-3xl font-semibold">First Oracle Update Win Rates</h1>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-anza-green-muted">
           Compare how often each prop AMM oracle (Humi, Tess, Sv2) lands the first update
           in a slot, segmented by leader validator. By default, the dashboard loads the most recent completed epoch snapshot; provide a slot range to analyze a custom window.
         </p>
       </header>
 
-      <form className="grid gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-4 sm:grid-cols-2" method="get">
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">Start slot</span>
+      <form className="grid gap-4 rounded-lg border border-anza-border bg-anza-surface p-4 sm:grid-cols-2" method="get">
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">Start slot</span>
           <input
             type="number"
             name="startSlot"
             defaultValue={Number.isFinite(startSlotParam) ? startSlotParam : ""}
-            className="mt-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 rounded border border-anza-border bg-white px-3 py-2 font-mono text-sm focus:border-anza-green focus:outline-none"
             placeholder="e.g. 377496100"
           />
         </label>
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">End slot</span>
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">End slot</span>
           <input
             type="number"
             name="endSlot"
             defaultValue={Number.isFinite(endSlotParam) ? endSlotParam : ""}
-            className="mt-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 rounded border border-anza-border bg-white px-3 py-2 font-mono text-sm focus:border-anza-green focus:outline-none"
             placeholder="e.g. 377496300"
           />
         </label>
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">Sort by</span>
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">Sort by</span>
           <select
             name="sortBy"
             defaultValue={sortByParam}
-            className="mt-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 rounded border border-anza-border bg-white px-3 py-2 text-sm focus:border-anza-green focus:outline-none"
           >
             <option value="slots">Slots counted</option>
             {PROP_AMM_GROUPS.map((group) => (
@@ -218,12 +218,12 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
             ))}
           </select>
         </label>
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">Sort direction</span>
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">Sort direction</span>
           <select
             name="sortDir"
             defaultValue={sortDirParam}
-            className="mt-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 rounded border border-anza-border bg-white px-3 py-2 text-sm focus:border-anza-green focus:outline-none"
           >
             <option value="desc">Descending</option>
             <option value="asc">Ascending</option>
@@ -232,34 +232,34 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
         <div className="sm:col-span-2">
           <button
             type="submit"
-            className="mt-2 inline-flex items-center rounded bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-white"
+            className="mt-2 inline-flex items-center rounded bg-anza-green px-4 py-2 text-sm font-semibold text-white hover:bg-anza-green-dark"
           >
             Analyze range
           </button>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-anza-green-subtle">
             Large ranges can take a while to compute; only slots with tracked prop AMM oracle updates are counted.
           </p>
         </div>
       </form>
 
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-900/20 p-4 text-sm text-red-200">
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {!error && wins.length > 0 && (
         <>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-300">
+          <div className="rounded-lg border border-anza-border bg-anza-surface p-4 text-sm text-anza-green-mid">
             <div>
-              <span className="font-semibold text-slate-100">{wins.length.toLocaleString()}</span>{" "}
+              <span className="font-semibold text-anza-green">{wins.length.toLocaleString()}</span>{" "}
               slots had at least one tracked prop AMM oracle update between{" "}
-              <span className="font-mono text-slate-100">{normalizedStart?.toLocaleString()}</span>{" "}
+              <span className="font-mono text-anza-green">{normalizedStart?.toLocaleString()}</span>{" "}
               and{" "}
-              <span className="font-mono text-slate-100">{normalizedEnd?.toLocaleString()}</span>.
+              <span className="font-mono text-anza-green">{normalizedEnd?.toLocaleString()}</span>.
             </div>
             {!useCustomRange && cacheGeneratedAt && (
-              <div className="mt-1 text-xs text-slate-500">
+              <div className="mt-1 text-xs text-anza-green-subtle">
                 {(cacheLabel ?? (defaultSource === "epoch" ? "Epoch snapshot" : "Recent cache"))} refreshed at{" "}
                 {new Date(cacheGeneratedAt).toLocaleString()}.
                 {defaultSource === "epoch" && epochNumber !== null && (
@@ -267,26 +267,26 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
                 )}
               </div>
             )}
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-anza-green-subtle">
               Each slot contributes exactly one win: the earliest oracle update among Humi, Tess, and Sv2 signers.
             </div>
           </div>
 
           {totalValidators > topBySlots.length && (
-            <div className="mb-2 text-xs text-slate-500">
+            <div className="mb-2 text-xs text-anza-green-subtle">
               Showing top {topBySlots.length} validators by slots (of {totalValidators.toLocaleString()} total).
             </div>
           )}
 
           <PropAmmWinrateScatter data={chartData} />
 
-          <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-            <div className="border-b border-slate-800 px-4 py-3 text-sm font-semibold text-slate-100">
+          <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+            <div className="border-b border-anza-border px-4 py-3 text-sm font-semibold text-anza-green">
               Validator win rate summary
             </div>
             <div className="max-h-[28rem] overflow-auto">
-              <table className="w-full text-left text-xs text-slate-200">
-                <thead className="bg-slate-900/60 text-slate-400">
+              <table className="w-full text-left text-xs text-anza-green">
+                <thead className="bg-anza-surface-alt text-anza-green-muted">
                   <tr>
                     <th className="px-3 py-2">Validator</th>
                     <th className="px-3 py-2">Slots counted</th>
@@ -307,7 +307,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
                           : 0
                     }));
                     return (
-                      <tr key={entry.validator} className="border-t border-slate-800">
+                      <tr key={entry.validator} className="border-t border-anza-border">
                         <td className="px-3 py-2 font-mono">{entry.validator}</td>
                         <td className="px-3 py-2">{entry.totalSlots.toLocaleString()}</td>
                         {winRates.map(({ group, rate }) => (
@@ -323,13 +323,13 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-            <div className="border-b border-slate-800 px-4 py-3 text-sm font-semibold text-slate-100">
+          <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+            <div className="border-b border-anza-border px-4 py-3 text-sm font-semibold text-anza-green">
               Slot-level winners
             </div>
             <div className="max-h-[28rem] overflow-auto">
-              <table className="w-full text-left text-xs text-slate-200">
-                <thead className="bg-slate-900/60 text-slate-400">
+              <table className="w-full text-left text-xs text-anza-green">
+                <thead className="bg-anza-surface-alt text-anza-green-muted">
                   <tr>
                     <th className="px-3 py-2">Slot</th>
                     <th className="px-3 py-2">Validator</th>
@@ -340,7 +340,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
                 </thead>
                 <tbody>
                   {wins.map((win) => (
-                    <tr key={`slot-${win.slot}`} className="border-t border-slate-800">
+                    <tr key={`slot-${win.slot}`} className="border-t border-anza-border">
                       <td className="px-3 py-2 font-mono">{win.slot.toLocaleString()}</td>
                       <td className="px-3 py-2 font-mono">{win.validator}</td>
                       <td className="px-3 py-2">
@@ -362,7 +362,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
                           href={`https://solscan.io/tx/${win.signature}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-sky-400 hover:underline"
+                          className="text-anza-green-mid hover:underline"
                         >
                           {win.signature.slice(0, 8)}…{win.signature.slice(-8)}
                         </a>
@@ -378,7 +378,7 @@ export default async function PropAmmWinratesPage({ searchParams }: PageProps) {
       )}
 
       {!error && wins.length === 0 && (
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-300">
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-6 text-sm text-anza-green-mid">
           No tracked oracle updates detected in this window.
         </div>
       )}

@@ -148,11 +148,11 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
               // Delay to allow click on dropdown item
               setTimeout(() => setShowDropdown(false), 200);
             }}
-            className="flex-1 rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="flex-1 rounded-lg border border-anza-border bg-anza-surface px-4 py-3 text-sm text-anza-green placeholder-anza-green-subtle focus:border-anza-green focus:outline-none focus:ring-1 focus:ring-anza-green"
           />
           <button
             type="submit"
-            className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            className="rounded-lg bg-anza-green px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-anza-green-dark focus:outline-none focus:ring-2 focus:ring-anza-green focus:ring-offset-2 focus:ring-offset-anza-bg"
           >
             Go
           </button>
@@ -160,7 +160,7 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
 
         {/* Dropdown suggestions */}
         {showDropdown && suggestions.length > 0 && (
-          <div className="absolute left-0 right-[80px] z-10 mt-1 max-h-64 overflow-auto rounded-lg border border-slate-700 bg-slate-900/95 py-2 text-sm shadow-lg">
+          <div className="absolute left-0 right-[80px] z-10 mt-1 max-h-64 overflow-auto rounded-lg border border-anza-border bg-anza-surface py-2 text-sm shadow-lg">
             {suggestions.map((suggestion, index) => (
               <button
                 key={suggestion.address}
@@ -168,20 +168,20 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
                 onClick={() => handleSuggestionClick(suggestion)}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={`w-full px-4 py-2 text-left ${
-                  index === highlightedIndex ? "bg-slate-700" : "hover:bg-slate-800"
+                  index === highlightedIndex ? "bg-anza-surface-alt" : "hover:bg-anza-surface-alt"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     {suggestion.name ? (
                       <>
-                        <span className="font-medium text-slate-200">{suggestion.name}</span>
-                        <span className="text-xs text-slate-400 font-mono">
+                        <span className="font-medium text-anza-green">{suggestion.name}</span>
+                        <span className="text-xs text-anza-green-muted font-mono">
                           {suggestion.address.slice(0, 8)}...{suggestion.address.slice(-8)}
                         </span>
                       </>
                     ) : (
-                      <span className="text-slate-200 font-mono">
+                      <span className="text-anza-green font-mono">
                         {suggestion.address.slice(0, 8)}...{suggestion.address.slice(-8)}
                       </span>
                     )}
@@ -194,7 +194,7 @@ export default function SlotSearch({ currentSlot }: SlotSearchProps) {
       </div>
 
       {/* Status messages */}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }

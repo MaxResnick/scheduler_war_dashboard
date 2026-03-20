@@ -133,7 +133,7 @@ export default function TransactionProportionalBars({
     return (
       <g>
         {/* header row */}
-        <text x={plotWidth / 2} y={yOffset + 14} textAnchor="middle" className="fill-slate-200 text-base font-semibold">
+        <text x={plotWidth / 2} y={yOffset + 14} textAnchor="middle" className="fill-anza-green text-base font-semibold">
           {title}
         </text>
         {slotNumber && (
@@ -141,7 +141,7 @@ export default function TransactionProportionalBars({
             x={plotWidth / 2}
             y={yOffset + 32}
             textAnchor="middle"
-            className="fill-slate-400 text-xs"
+            className="fill-anza-green-muted text-xs"
           >
             Slot {slotNumber.toLocaleString()}
             {validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}
@@ -182,7 +182,7 @@ export default function TransactionProportionalBars({
   }
 
   return (
-    <div className="overflow-visible rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+    <div className="overflow-visible rounded-lg border border-anza-border bg-anza-surface p-4">
       <svg width={width} height={height} className="overflow-visible mx-auto block">
         <g transform={`translate(${padding.left}, ${padding.top})`}>
           {renderPanel(0, cu, "Compute Units", "Compute Units", true)}
@@ -191,7 +191,7 @@ export default function TransactionProportionalBars({
       </svg>
 
       {/* legend */}
-      <div className="mt-2 flex items-center gap-6 text-xs text-slate-400">
+      <div className="mt-2 flex items-center gap-6 text-xs text-anza-green-muted">
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: jitoColor}}></span>Jito bundle</div>
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: nonJitoColor}}></span>Regular transactions</div>
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: feeSpoofColor}}></span>Temporal controlled fee payer</div>

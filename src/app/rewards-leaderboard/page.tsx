@@ -106,7 +106,7 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       <header className="space-y-2">
-        <p className="text-sm uppercase tracking-wide text-slate-400">
+        <p className="text-sm uppercase tracking-wide text-anza-green-muted">
           Solana Scheduler War
         </p>
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -114,13 +114,13 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
           <div className="flex flex-wrap gap-2">
             <Link
               href="/"
-              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="rounded-lg bg-anza-surface-alt px-4 py-2 text-sm font-medium text-anza-green transition-colors hover:bg-anza-border"
             >
               &larr; Home
             </Link>
           </div>
         </div>
-        <p className="max-w-2xl text-sm text-slate-300">
+        <p className="max-w-2xl text-sm text-anza-green-mid">
           Validators ranked by total rewards earned as block leader in a given epoch.
           Rewards include base fees and tips.
         </p>
@@ -128,42 +128,42 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
 
       {/* Epoch selector */}
       <form
-        className="flex flex-wrap items-end gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+        className="flex flex-wrap items-end gap-4 rounded-lg border border-anza-border bg-anza-surface p-4"
         method="get"
       >
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">Epoch</span>
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">Epoch</span>
           <input
             type="number"
             name="epoch"
             defaultValue={Number.isFinite(epochParam) ? epochParam : data?.epoch ?? ""}
-            className="mt-1 w-40 rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 w-40 rounded border border-anza-border bg-white px-3 py-2 font-mono text-sm focus:border-anza-green focus:outline-none"
             placeholder="e.g. 750"
           />
         </label>
-        <label className="flex flex-col text-sm text-slate-200">
-          <span className="text-xs uppercase tracking-wide text-slate-400">Page Size</span>
+        <label className="flex flex-col text-sm text-anza-green">
+          <span className="text-xs uppercase tracking-wide text-anza-green-muted">Page Size</span>
           <input
             type="number"
             name="pageSize"
             min={1}
             max={200}
             defaultValue={data?.pageSize ?? pageSize}
-            className="mt-1 w-32 rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm focus:border-slate-500 focus:outline-none"
+            className="mt-1 w-32 rounded border border-anza-border bg-white px-3 py-2 font-mono text-sm focus:border-anza-green focus:outline-none"
             placeholder="50"
           />
         </label>
         <input type="hidden" name="page" value="1" />
         <button
           type="submit"
-          className="inline-flex items-center rounded bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-white"
+          className="inline-flex items-center rounded bg-anza-green px-4 py-2 text-sm font-semibold text-white hover:bg-anza-green-dark"
         >
           Search
         </button>
       </form>
 
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-900/20 p-4 text-sm text-red-200">
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -172,47 +172,47 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-400">Epoch</div>
-              <div className="mt-1 text-2xl font-semibold text-slate-100">
+            <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+              <div className="text-xs uppercase tracking-wide text-anza-green-muted">Epoch</div>
+              <div className="mt-1 text-2xl font-semibold text-anza-green">
                 {data.epoch.toLocaleString()}
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-400">Total Rewards</div>
-              <div className="mt-1 text-2xl font-semibold text-slate-100">
+            <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+              <div className="text-xs uppercase tracking-wide text-anza-green-muted">Total Rewards</div>
+              <div className="mt-1 text-2xl font-semibold text-anza-green">
                 {formatSol(totalRewards)} SOL
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-400">Total Blocks</div>
-              <div className="mt-1 text-2xl font-semibold text-slate-100">
+            <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+              <div className="text-xs uppercase tracking-wide text-anza-green-muted">Total Blocks</div>
+              <div className="mt-1 text-2xl font-semibold text-anza-green">
                 {totalBlocks.toLocaleString()}
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-400">Validators</div>
-              <div className="mt-1 text-2xl font-semibold text-slate-100">
+            <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+              <div className="text-xs uppercase tracking-wide text-anza-green-muted">Validators</div>
+              <div className="mt-1 text-2xl font-semibold text-anza-green">
                 {data.totalValidators.toLocaleString()}
               </div>
             </div>
           </div>
 
           {stale && (
-            <div className="rounded-lg border border-amber-800 bg-amber-900/20 p-3 text-xs text-amber-200">
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-700">
               This data may be stale. Generated at{" "}
               {new Date(data.generatedAt).toLocaleString()}.
             </div>
           )}
 
           {/* Leaderboard table */}
-          <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-            <div className="border-b border-slate-800 px-4 py-3 text-sm font-semibold text-slate-100">
+          <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+            <div className="border-b border-anza-border px-4 py-3 text-sm font-semibold text-anza-green">
               Leaderboard &mdash; Epoch {data.epoch}
             </div>
             <div className="max-h-[40rem] overflow-auto">
-              <table className="w-full text-left text-sm text-slate-200">
-                <thead className="sticky top-0 bg-slate-900/90 text-xs text-slate-400 backdrop-blur">
+              <table className="w-full text-left text-sm text-anza-green">
+                <thead className="sticky top-0 bg-anza-surface/90 text-xs text-anza-green-muted backdrop-blur">
                   <tr>
                     <th className="px-4 py-3 text-right w-16">Rank</th>
                     <th className="px-4 py-3">Validator</th>
@@ -226,23 +226,23 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                 </thead>
                 <tbody>
                   {data.leaderboard.map((entry) => (
-                    <tr key={entry.validator} className="border-t border-slate-800 hover:bg-slate-800/40">
-                      <td className="px-4 py-3 text-right font-mono text-slate-400">
+                    <tr key={entry.validator} className="border-t border-anza-border hover:bg-anza-surface-alt/40">
+                      <td className="px-4 py-3 text-right font-mono text-anza-green-muted">
                         {entry.rank}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
-                          <span className="font-medium text-slate-100">
+                          <span className="font-medium text-anza-green">
                             {entry.validatorName || truncateAddress(entry.validator)}
                           </span>
                           {entry.validatorName && (
-                            <span className="font-mono text-xs text-slate-500">
+                            <span className="font-mono text-xs text-anza-green-subtle">
                               {truncateAddress(entry.validator)}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-300">{entry.softwareClient}</td>
+                      <td className="px-4 py-3 text-anza-green-mid">{entry.softwareClient}</td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatSol(entry.totalValidatorRewardSol)} SOL
                       </td>
@@ -255,7 +255,7 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                       <td className="px-4 py-3 text-right">
                         {entry.blockCount.toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-slate-400">
+                      <td className="px-4 py-3 text-right font-mono text-anza-green-muted">
                         {entry.blockCount > 0
                           ? formatSol(entry.totalValidatorRewardSol / entry.blockCount)
                           : "\u2014"}
@@ -267,7 +267,7 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/40 px-4 py-3 text-sm text-slate-300">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-anza-border bg-anza-surface px-4 py-3 text-sm text-anza-green-mid">
             <span>
               Showing {pageStart.toLocaleString()}-{pageEnd.toLocaleString()} of{" "}
               {data.totalValidators.toLocaleString()} validators
@@ -280,16 +280,16 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                     page: data.page - 1,
                     pageSize: data.pageSize,
                   })}
-                  className="rounded border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800"
+                  className="rounded border border-anza-border px-3 py-1.5 text-anza-green hover:bg-anza-surface-alt"
                 >
                   Previous
                 </Link>
               ) : (
-                <span className="rounded border border-slate-800 px-3 py-1.5 text-slate-500">
+                <span className="rounded border border-anza-border px-3 py-1.5 text-anza-green-subtle">
                   Previous
                 </span>
               )}
-              <span className="px-1 text-slate-400">
+              <span className="px-1 text-anza-green-muted">
                 Page {data.page.toLocaleString()} of {Math.max(data.totalPages, 1).toLocaleString()}
               </span>
               {data.page < data.totalPages ? (
@@ -299,12 +299,12 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                     page: data.page + 1,
                     pageSize: data.pageSize,
                   })}
-                  className="rounded border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800"
+                  className="rounded border border-anza-border px-3 py-1.5 text-anza-green hover:bg-anza-surface-alt"
                 >
                   Next
                 </Link>
               ) : (
-                <span className="rounded border border-slate-800 px-3 py-1.5 text-slate-500">
+                <span className="rounded border border-anza-border px-3 py-1.5 text-anza-green-subtle">
                   Next
                 </span>
               )}
@@ -314,7 +314,7 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
       )}
 
       {data && !error && data.leaderboard.length === 0 && (
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-300">
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-6 text-sm text-anza-green-mid">
           No rewards data found for this epoch.
         </div>
       )}

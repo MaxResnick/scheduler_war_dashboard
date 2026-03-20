@@ -140,10 +140,10 @@ export default function TransactionSequencingTimeline({
   }
 
   return (
-    <div className="overflow-visible rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+    <div className="overflow-visible rounded-lg border border-anza-border bg-anza-surface p-4">
       <div className="mb-2">
         <h3 className="text-lg font-semibold">Transaction Sequencing Timeline</h3>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-anza-green-muted">
           PoH tick across the slot
           {slotNumber ? ` • Slot ${slotNumber.toLocaleString()}` : ""}
           {validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}
@@ -182,7 +182,7 @@ export default function TransactionSequencingTimeline({
 
             return (
               <g key={panel.key}>
-                <text x={0} y={yOffset + 14} textAnchor="start" className="fill-slate-300 text-sm">
+                <text x={0} y={yOffset + 14} textAnchor="start" className="fill-anza-green-mid text-sm">
                   {panel.label}
                 </text>
 
@@ -257,14 +257,14 @@ export default function TransactionSequencingTimeline({
                   x={x}
                   y={axisY + 12}
                   textAnchor="middle"
-                  className="fill-slate-400 text-xs"
+                  className="fill-anza-green-muted text-xs"
                 >
                   {tickVal}
                 </text>
               );
             });
           })()}
-          <text x={plotWidth / 2} y={3 * panelHeight + 2 * gap + 26} textAnchor="middle" className="fill-slate-300 text-sm">
+          <text x={plotWidth / 2} y={3 * panelHeight + 2 * gap + 26} textAnchor="middle" className="fill-anza-green-mid text-sm">
             PoH Tick (#)
           </text>
         </g>

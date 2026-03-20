@@ -15,7 +15,7 @@ type MiniAreaChartProps = {
 
 export default function MiniAreaChart({
   points,
-  color = "#38bdf8",
+  color = "#1c6b00",
   height = 160
 }: MiniAreaChartProps) {
   const rawId = useId();

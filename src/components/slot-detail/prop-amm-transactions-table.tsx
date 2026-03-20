@@ -15,26 +15,26 @@ export default function PropAmmTransactionsTable({ transactions }: Props) {
 
   if (propTx.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-400">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-4 text-sm text-anza-green-muted">
         No prop AMM oracle updates were detected in this slot.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-      <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
+    <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+      <div className="flex items-center justify-between border-b border-anza-border px-4 py-3">
         <div>
           <h3 className="text-lg font-semibold text-white">Prop AMM Oracle Updates</h3>
-          <p className="text-xs text-slate-400">Only transactions that touch tracked prop AMM signer accounts</p>
+          <p className="text-xs text-anza-green-muted">Only transactions that touch tracked prop AMM signer accounts</p>
         </div>
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-anza-green-muted">
           Count: {propTx.length.toLocaleString()}
         </div>
       </div>
       <div className="max-h-[22rem] overflow-auto">
-        <table className="w-full text-left text-xs text-slate-200">
-          <thead className="sticky top-0 bg-slate-900/80 text-slate-400">
+        <table className="w-full text-left text-xs text-anza-green">
+          <thead className="sticky top-0 bg-anza-surface text-anza-green-muted">
             <tr>
               <th className="px-3 py-2">Idx</th>
               <th className="px-3 py-2">Signature</th>
@@ -51,14 +51,14 @@ export default function PropAmmTransactionsTable({ transactions }: Props) {
           </thead>
           <tbody>
             {propTx.map((t) => (
-              <tr key={`${t.signature}-${t.index}`} className="border-t border-slate-800">
+              <tr key={`${t.signature}-${t.index}`} className="border-t border-anza-border">
                 <td className="px-3 py-2 font-mono">{t.index}</td>
                 <td className="px-3 py-2 font-mono">
                   <a
                     href={`https://solscan.io/tx/${t.signature}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sky-400 hover:underline"
+                    className="text-anza-green-mid hover:underline"
                   >
                     {t.signature.slice(0, 8)}…{t.signature.slice(-8)}
                   </a>
@@ -70,7 +70,7 @@ export default function PropAmmTransactionsTable({ transactions }: Props) {
                       href={`https://solscan.io/account/${t.propAmmAccount}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sky-400 hover:underline"
+                      className="text-anza-green-mid hover:underline"
                     >
                       {t.propAmmAccount}
                     </a>

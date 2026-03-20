@@ -16,22 +16,22 @@ export default function MetricCard({
   footer
 }: MetricCardProps) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4 shadow-sm shadow-slate-950/40">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+    <div className="flex flex-col gap-2 rounded-lg border border-anza-border bg-anza-surface p-4 shadow-sm shadow-anza-border/40">
+      <span className="text-xs font-semibold uppercase tracking-wide text-anza-green-muted">
         {label}
       </span>
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-semibold text-slate-100">
+        <span className="text-3xl font-semibold text-anza-green">
           {value}
         </span>
         {delta && (
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-anza-green-muted">
             {delta}
           </span>
         )}
       </div>
       {footer && (
-        <div className="mt-auto text-xs text-slate-400">
+        <div className="mt-auto text-xs text-anza-green-muted">
           {footer}
         </div>
       )}

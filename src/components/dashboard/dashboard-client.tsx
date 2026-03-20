@@ -177,7 +177,7 @@ export default function DashboardClient({
   return (
     <section className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-1">
+        <div className="flex items-center gap-2 rounded-lg border border-anza-border bg-anza-surface p-1">
           {RANGE_OPTIONS.map((option) => (
             <button
               key={option.hours}
@@ -185,8 +185,8 @@ export default function DashboardClient({
               onClick={() => refreshData(option.hours)}
               className={`rounded-md px-3 py-1 text-sm transition ${
                 selectedHours === option.hours
-                  ? "bg-sky-500 text-slate-900"
-                  : "text-slate-300 hover:bg-slate-800"
+                  ? "bg-anza-green text-white"
+                  : "text-anza-green-muted hover:bg-anza-surface-alt"
               }`}
             >
               {option.label}
@@ -194,7 +194,7 @@ export default function DashboardClient({
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-anza-green-muted">
             Range: {new Date(data.range.from).toLocaleString()} → {new Date(data.range.to).toLocaleString()}
           </div>
           <button
@@ -203,8 +203,8 @@ export default function DashboardClient({
             disabled={isPending}
             className={`rounded-md border px-3 py-1 text-sm ${
               isPending
-                ? "cursor-not-allowed border-slate-800 bg-slate-800 text-slate-500"
-                : "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                ? "cursor-not-allowed border-anza-border bg-anza-surface-alt text-anza-green-subtle"
+                : "border-anza-border bg-anza-surface-alt text-anza-green hover:bg-anza-border"
             }`}
             title="Refresh dashboard"
           >
@@ -214,7 +214,7 @@ export default function DashboardClient({
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -245,22 +245,22 @@ export default function DashboardClient({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+        <div className="flex flex-col gap-4 rounded-lg border border-anza-border bg-anza-surface p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">
                 Bundle landings
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-anza-green-muted">
                 Aggregated landed bundles and estimated profit.
               </p>
             </div>
             {isPending && (
-              <span className="text-xs text-slate-400">Refreshing…</span>
+              <span className="text-xs text-anza-green-muted">Refreshing…</span>
             )}
           </div>
-          <MiniAreaChart points={bundleChart} color="#38bdf8" />
-          <div className="text-xs text-slate-400">
+          <MiniAreaChart points={bundleChart} color="#1c6b00" />
+          <div className="text-xs text-anza-green-muted">
             Estimated total profit:{" "}
             {derivedMetrics.bundleTotals.profit.toLocaleString(undefined, {
               maximumFractionDigits: 0
@@ -269,34 +269,34 @@ export default function DashboardClient({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+        <div className="flex flex-col gap-4 rounded-lg border border-anza-border bg-anza-surface p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">
                 Geyser throughput
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-anza-green-muted">
                 Transactions entering the scheduler over time.
               </p>
             </div>
             {isPending && (
-              <span className="text-xs text-slate-400">Refreshing…</span>
+              <span className="text-xs text-anza-green-muted">Refreshing…</span>
             )}
           </div>
-          <MiniAreaChart points={transactionChart} color="#fbbf24" />
-          <div className="text-xs text-slate-400">
+          <MiniAreaChart points={transactionChart} color="#b45309" />
+          <div className="text-xs text-anza-green-muted">
             Total transactions: {totalTransactions(data.transactions).toLocaleString()}
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+        <div className="flex flex-col gap-4 rounded-lg border border-anza-border bg-anza-surface p-6">
           <div>
             <h2 className="text-lg font-semibold">
               Slot status distribution
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-anza-green-muted">
               Share of scheduler slots by reported status.
             </p>
           </div>
@@ -304,66 +304,66 @@ export default function DashboardClient({
             {derivedMetrics.slotStatusShare.map((item) => (
               <li
                 key={item.status}
-                className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2"
+                className="flex items-center justify-between rounded-md border border-anza-border bg-anza-surface-alt px-3 py-2"
               >
-                <span className="font-medium capitalize text-slate-200">
+                <span className="font-medium capitalize text-anza-green">
                   {item.status}
                 </span>
-                <span className="text-slate-300">
+                <span className="text-anza-green-mid">
                   {item.percentage.toFixed(1)}%
                 </span>
               </li>
             ))}
             {!derivedMetrics.slotStatusShare.length && (
-              <li className="text-xs text-slate-400">
+              <li className="text-xs text-anza-green-muted">
                 Slot status metrics unavailable for the selected window.
               </li>
             )}
           </ul>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+        <div className="flex flex-col gap-4 rounded-lg border border-anza-border bg-anza-surface p-6">
           <div>
             <h2 className="text-lg font-semibold">
               Block metadata snapshot
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-anza-green-muted">
               Latest signal from geyser block metadata stream.
             </p>
           </div>
           {derivedMetrics.latestBlockMeta ? (
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <dt className="text-xs uppercase text-slate-500">
+                <dt className="text-xs uppercase text-anza-green-subtle">
                   Avg tx per block
                 </dt>
-                <dd className="text-lg font-semibold text-slate-200">
+                <dd className="text-lg font-semibold text-anza-green">
                   {formatNullable(derivedMetrics.latestBlockMeta.avgTxPerBlock)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase text-slate-500">
+                <dt className="text-xs uppercase text-anza-green-subtle">
                   Avg successful tx
                 </dt>
-                <dd className="text-lg font-semibold text-slate-200">
+                <dd className="text-lg font-semibold text-anza-green">
                   {formatNullable(derivedMetrics.latestBlockMeta.avgSuccessTx)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase text-slate-500">
+                <dt className="text-xs uppercase text-anza-green-subtle">
                   Avg compute units
                 </dt>
-                <dd className="text-lg font-semibold text-slate-200">
+                <dd className="text-lg font-semibold text-anza-green">
                   {formatNullable(
                     derivedMetrics.latestBlockMeta.avgComputeUnits
                   )}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase text-slate-500">
+                <dt className="text-xs uppercase text-anza-green-subtle">
                   Window
                 </dt>
-                <dd className="text-sm text-slate-300">
+                <dd className="text-sm text-anza-green-mid">
                   {new Date(
                     derivedMetrics.latestBlockMeta.windowStart
                   ).toLocaleString()}
@@ -371,14 +371,14 @@ export default function DashboardClient({
               </div>
             </dl>
           ) : (
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-anza-green-muted">
               Block metadata not available for the selected range yet.
             </p>
           )}
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-anza-green-muted">
             Entry ingest over time:
           </div>
-          <MiniAreaChart points={entryChart} color="#34d399" height={120} />
+          <MiniAreaChart points={entryChart} color="#059669" height={120} />
         </div>
       </div>
     </section>

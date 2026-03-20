@@ -162,7 +162,7 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="text-2xl font-semibold">Validator Slot Time Rankings</h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-anza-green-muted">
             {validators.length} validators ranked by average time between consecutive leader slots.
             Range: 0ms - {maxSlotTime.toFixed(0)}ms
           </p>
@@ -184,12 +184,12 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
               // Delay to allow click on dropdown item
               setTimeout(() => setShowDropdown(false), 200);
             }}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full rounded-lg border border-anza-border bg-anza-surface px-4 py-3 text-sm text-anza-green placeholder-anza-green-subtle focus:border-anza-green focus:outline-none focus:ring-1 focus:ring-anza-green"
           />
 
           {/* Dropdown suggestions */}
           {showDropdown && matchingValidators.length > 0 && !selectedValidator && (
-            <div className="absolute left-0 right-0 z-10 mt-1 max-h-64 overflow-auto rounded-lg border border-slate-700 bg-slate-900/95 py-2 text-sm shadow-lg">
+            <div className="absolute left-0 right-0 z-10 mt-1 max-h-64 overflow-auto rounded-lg border border-anza-border bg-anza-surface py-2 text-sm shadow-lg">
               {matchingValidators.map((validator, index) => (
                 <button
                   key={validator.validator_address}
@@ -197,24 +197,24 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
                   onMouseDown={() => handleSelectValidator(validator.validator_address)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={`w-full px-4 py-2 text-left ${
-                    index === highlightedIndex ? "bg-slate-700" : "hover:bg-slate-800"
+                    index === highlightedIndex ? "bg-anza-surface-alt" : "hover:bg-anza-surface-alt"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                       {validator.name ? (
                         <>
-                          <span className="font-medium text-slate-200">{validator.name}</span>
-                          <span className="text-xs text-slate-400 font-mono">
+                          <span className="font-medium text-anza-green">{validator.name}</span>
+                          <span className="text-xs text-anza-green-muted font-mono">
                             {validator.validator_address.slice(0, 8)}...{validator.validator_address.slice(-8)}
                           </span>
                         </>
                       ) : (
-                        <span className="text-slate-200 font-mono">{validator.validator_address}</span>
+                        <span className="text-anza-green font-mono">{validator.validator_address}</span>
                       )}
                     </div>
                     <div className="text-right text-xs">
-                      <div className="text-slate-400">Rank #{validator.rank}</div>
+                      <div className="text-anza-green-muted">Rank #{validator.rank}</div>
                       <div className={
                         validator.avg_slot_time_ms > 450
                           ? "text-red-400"
@@ -234,17 +234,17 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
           {/* Selected validator info */}
           {searchedValidatorIndex >= 0 && searchedValidator && (
             <div className="mt-2 text-sm">
-              <span className="text-slate-400">Found: </span>
+              <span className="text-anza-green-muted">Found: </span>
               {searchedValidatorName && (
-                <span className="font-medium text-sky-400">{searchedValidatorName} </span>
+                <span className="font-medium text-anza-green-mid">{searchedValidatorName} </span>
               )}
-              <span className="text-slate-300 font-mono text-xs">
+              <span className="text-anza-green-mid font-mono text-xs">
                 ({searchedValidator.validator_address.slice(0, 8)}...{searchedValidator.validator_address.slice(-8)})
               </span>
-              <span className="text-slate-400"> - Rank </span>
-              <span className="text-sky-400">#{searchedValidatorIndex + 1}</span>
-              <span className="text-slate-400"> - </span>
-              <span className="text-sky-400">{searchedValidator.avg_slot_time_ms.toFixed(0)}ms</span>
+              <span className="text-anza-green-muted"> - Rank </span>
+              <span className="text-anza-green-mid">#{searchedValidatorIndex + 1}</span>
+              <span className="text-anza-green-muted"> - </span>
+              <span className="text-anza-green-mid">{searchedValidator.avg_slot_time_ms.toFixed(0)}ms</span>
             </div>
           )}
         </div>
@@ -252,11 +252,11 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
 
       <div className="flex gap-4">
         {/* Legend - Left Side */}
-        <div className="flex-shrink-0 rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="flex-shrink-0 rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-anza-green-muted">
             Client Type
           </div>
-          <div className="flex flex-col gap-3 text-xs text-slate-300">
+          <div className="flex flex-col gap-3 text-xs text-anza-green-mid">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded" style={{ backgroundColor: "#7C3AED" }}></div>
               <span>BAM</span>
@@ -297,9 +297,9 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
               <div className="h-3 w-3 rounded" style={{ backgroundColor: "#64748b" }}></div>
               <span>Unknown</span>
             </div>
-            <div className="mt-2 border-t border-slate-700 pt-3">
+            <div className="mt-2 border-t border-anza-border pt-3">
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded bg-sky-500"></div>
+                <div className="h-3 w-3 rounded" style={{ backgroundColor: "#f59e0b" }}></div>
                 <span>Search result</span>
               </div>
             </div>
@@ -307,7 +307,7 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
         </div>
 
         {/* Chart */}
-        <div className="flex-1 overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+        <div className="flex-1 overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
           <svg width="100%" height={chartHeight} className="overflow-visible">
             {validators.map((validator, index) => {
               const widthPercent = (validator.avg_slot_time_ms / maxSlotTime) * 100;
@@ -343,7 +343,7 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
                     y={y}
                     width={`${widthPercent}%`}
                     height={barHeight - 2}
-                    fill={isHighlighted ? "#38bdf8" : barColor}
+                    fill={isHighlighted ? "#f59e0b" : barColor}
                     opacity={isHovered ? 0.95 : 0.75}
                     stroke={isHovered ? "#fff" : "none"}
                     strokeWidth={isHovered ? 1 : 0}

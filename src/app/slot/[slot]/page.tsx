@@ -42,7 +42,7 @@ export default async function SlotPage({ params }: SlotPageProps) {
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
         <header className="space-y-2">
-          <p className="text-sm uppercase tracking-wide text-slate-400">
+          <p className="text-sm uppercase tracking-wide text-anza-green-muted">
             Slot Detail
           </p>
           <h1 className="text-3xl font-semibold">Invalid Slot Number</h1>
@@ -87,11 +87,11 @@ export default async function SlotPage({ params }: SlotPageProps) {
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
         <header className="space-y-2">
-          <p className="text-sm uppercase tracking-wide text-slate-400">
+          <p className="text-sm uppercase tracking-wide text-anza-green-muted">
             Slot Detail
           </p>
           <h1 className="text-3xl font-semibold">Error Loading Slot</h1>
-          <p className="text-sm text-red-400">
+          <p className="text-sm text-red-600">
             {error instanceof Error ? error.message : "Failed to fetch slot data"}
           </p>
         </header>
@@ -132,19 +132,19 @@ export default async function SlotPage({ params }: SlotPageProps) {
       <header className="space-y-2">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-sm uppercase tracking-wide text-slate-400">
+            <p className="text-sm uppercase tracking-wide text-anza-green-muted">
               Solana Scheduler War
             </p>
             <h1 className="text-3xl font-semibold">Slot {slot}</h1>
           </div>
           <div className="text-right">
-            <div className="text-xs text-slate-400">Leader Validator</div>
+            <div className="text-xs text-anza-green-muted">Leader Validator</div>
             {leaderValidatorName && (
-              <div className="mt-1 text-sm font-medium text-sky-400">
+              <div className="mt-1 text-sm font-medium text-anza-green-mid">
                 {leaderValidatorName}
               </div>
             )}
-            <div className={`${leaderValidatorName ? 'mt-0.5' : 'mt-1'} max-w-[420px] truncate font-mono text-xs text-slate-400`}>
+            <div className={`${leaderValidatorName ? 'mt-0.5' : 'mt-1'} max-w-[420px] truncate font-mono text-xs text-anza-green-muted`}>
               {metadata.leaderValidator}
             </div>
             {leaderValidatorClient && (
@@ -163,12 +163,12 @@ export default async function SlotPage({ params }: SlotPageProps) {
       </header>
 
       {isTransitionSlot && (
-        <div className="rounded-lg border border-amber-600/50 bg-amber-900/20 px-4 py-3">
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400">⚠</span>
-            <span className="text-sm font-medium text-amber-300">Transition Slot</span>
+            <span className="text-amber-700">⚠</span>
+            <span className="text-sm font-medium text-amber-700">Transition Slot</span>
           </div>
-          <p className="mt-1 text-xs text-amber-200/80">
+          <p className="mt-1 text-xs text-amber-600/80">
             This is the first slot of a 4-slot leader window. Slot time measurements may include
             cross-validator timing variance and should be interpreted with caution.
           </p>
@@ -179,8 +179,8 @@ export default async function SlotPage({ params }: SlotPageProps) {
 
       {/* Recent Leader Slots */}
       {recentSlots.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-          <div className="border-b border-slate-800 px-4 py-3">
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+          <div className="border-b border-anza-border px-4 py-3">
             <h2 className="text-sm font-semibold">Recent Leader Slots</h2>
           </div>
           <div className="flex flex-wrap gap-2 px-4 py-3">
@@ -192,12 +192,12 @@ export default async function SlotPage({ params }: SlotPageProps) {
                   href={`/slot/${s.slot}`}
                   className={`rounded px-3 py-1.5 font-mono text-xs transition-colors ${
                     isCurrent
-                      ? "bg-sky-600 text-white"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      ? "bg-anza-green text-white"
+                      : "bg-anza-surface-alt text-anza-green-mid hover:bg-anza-border"
                   }`}
                 >
                   {s.slot.toLocaleString()}
-                  <span className={`ml-1.5 ${isCurrent ? "text-sky-200" : "text-slate-500"}`}>
+                  <span className={`ml-1.5 ${isCurrent ? "text-anza-green-mid" : "text-anza-green-subtle"}`}>
                     {(s.total_fee_lamports / 1_000_000_000).toFixed(4)}
                   </span>
                 </Link>
@@ -209,25 +209,25 @@ export default async function SlotPage({ params }: SlotPageProps) {
 
       {/* Slot Highlights */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Slot Time</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Slot Time</div>
           <div className="mt-1 text-2xl font-semibold">
             {slotTimeMs !== null ? `${slotTimeMs}ms` : "—"}
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Jito Tips</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Jito Tips</div>
           <div className="mt-1 text-2xl font-semibold">{toSol(totalTipsLamports)} SOL</div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Block Rewards</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Block Rewards</div>
           <div className="mt-1 text-2xl font-semibold">{toSol(blockRewardsLamports)} SOL</div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Compute Units Used</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Compute Units Used</div>
           <div className="mt-1 text-2xl font-semibold">{totalCuUsed.toLocaleString()}</div>
         </div>
       </div>
@@ -265,18 +265,18 @@ export default async function SlotPage({ params }: SlotPageProps) {
       />
       {/* Summary Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Total Entries</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Total Entries</div>
           <div className="mt-1 text-2xl font-semibold">{entries.length}</div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Total Transactions</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Total Transactions</div>
           <div className="mt-1 text-2xl font-semibold">{transactions.length}</div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400">Vote Transactions</div>
+        <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-4">
+          <div className="text-xs text-anza-green-muted">Vote Transactions</div>
           <div className="mt-1 text-2xl font-semibold">
             {transactions.filter((t) => t.isVote).length}
           </div>

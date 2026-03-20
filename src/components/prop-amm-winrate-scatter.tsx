@@ -45,17 +45,17 @@ export default function PropAmmWinrateScatter({ data }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-400">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-6 text-sm text-anza-green-muted">
         No prop AMM oracle wins detected in this range.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+    <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-white">Prop AMM Win Rate Heatmap</h3>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-anza-green-muted">
           Validators along the rows, prop AMM oracles along columns. Cell color encodes how often that validator allowed a given prop AMM to land the first oracle update (win rate). Darker cells mean higher win rates.
         </p>
       </div>
@@ -68,7 +68,7 @@ export default function PropAmmWinrateScatter({ data }: Props) {
               x={idx * cellWidth + cellWidth / 2}
               y={-20}
               textAnchor="middle"
-              className="fill-slate-300 text-sm"
+              className="fill-anza-green-mid text-sm"
             >
               {group}
             </text>
@@ -81,7 +81,7 @@ export default function PropAmmWinrateScatter({ data }: Props) {
               x={-20}
               y={rowIdx * cellHeight + cellHeight / 2 + 4}
               textAnchor="end"
-              className="fill-slate-300 text-xs font-mono"
+              className="fill-anza-green-mid text-xs font-mono"
             >
               {validator}
             </text>
@@ -121,7 +121,7 @@ export default function PropAmmWinrateScatter({ data }: Props) {
         </g>
       </svg>
 
-      <div className="mt-4 flex items-center gap-4 text-xs text-slate-400">
+      <div className="mt-4 flex items-center gap-4 text-xs text-anza-green-muted">
         <div className="flex items-center gap-2">0%</div>
         <div className="flex-1 h-2 rounded-full" style={{ background: `linear-gradient(90deg, ${COLOR_SCALE.join(",")})` }} />
         <div className="flex items-center gap-2">100%</div>

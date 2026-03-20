@@ -105,10 +105,10 @@ export default function TransactionSequencingChart({
   const maxTickValue = maxTick;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+    <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Cumulative Transaction Sequencing</h3>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-anza-green-muted">
           Cumulative by PoH tick (#{maxTickValue})
           {slotNumber ? ` • Slot ${slotNumber.toLocaleString()}` : ""}
           {validatorIdentity ? ` • ${validatorName || validatorIdentity}` : ""}
@@ -210,7 +210,7 @@ export default function TransactionSequencingChart({
             x={plotWidth / 2}
             y={plotHeight + 40}
             textAnchor="middle"
-            className="fill-slate-300 text-sm"
+            className="fill-anza-green-mid text-sm"
           >
             PoH Tick (#)
           </text>
@@ -229,7 +229,7 @@ export default function TransactionSequencingChart({
             y={-50}
             textAnchor="middle"
             transform={`rotate(-90, ${-plotHeight / 2}, -50)`}
-            className="fill-slate-300 text-sm"
+            className="fill-anza-green-mid text-sm"
           >
             Cumulative Transactions
           </text>
@@ -241,7 +241,7 @@ export default function TransactionSequencingChart({
             return (
               <g key={`xtick-${d.tick}`}>
                 <line x1={x} y1={plotHeight} x2={x} y2={plotHeight + 5} stroke="rgb(148, 163, 184)" strokeWidth={1} />
-                <text x={x} y={plotHeight + 20} textAnchor="middle" className="fill-slate-400 text-xs">
+                <text x={x} y={plotHeight + 20} textAnchor="middle" className="fill-anza-green-muted text-xs">
                   {d.tick}
                 </text>
               </g>
@@ -266,7 +266,7 @@ export default function TransactionSequencingChart({
                   x={-10}
                   y={y + 4}
                   textAnchor="end"
-                  className="fill-slate-400 text-xs"
+                  className="fill-anza-green-muted text-xs"
                 >
                   {label}
                 </text>
@@ -277,7 +277,7 @@ export default function TransactionSequencingChart({
       </svg>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center gap-6 text-xs text-slate-400">
+      <div className="mt-4 flex items-center gap-6 text-xs text-anza-green-muted">
         <div className="flex items-center gap-2">
           <div className="h-0.5 w-6" style={{ backgroundColor: '#bbf7d0' }} />
           <span>Votes (cumulative)</span>

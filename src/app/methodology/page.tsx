@@ -81,49 +81,49 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       <header className="space-y-2">
-        <p className="text-sm uppercase tracking-wide text-slate-400">
+        <p className="text-sm uppercase tracking-wide text-anza-green-muted">
           Solana Scheduler War
         </p>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-semibold">Methodology</h1>
           <Link
             href="/"
-            className="text-sm font-medium text-sky-400 transition-colors hover:text-sky-300"
+            className="text-sm font-medium text-anza-green-mid transition-colors hover:text-anza-green"
           >
             ← Back to dashboard
           </Link>
         </div>
-        <p className="max-w-3xl text-sm text-slate-300">
+        <p className="max-w-3xl text-sm text-anza-green-mid">
           How we turn geyser streams into slot-by-slot sequencing views. Explore
           the raw entry trace below; dotted lines mark PoH ticks (entries with
           no executed transactions).
         </p>
       </header>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-wide text-slate-400">
+            <div className="text-xs uppercase tracking-wide text-anza-green-muted">
               Sample Slot
             </div>
-            <div className="text-2xl font-semibold text-slate-50">
+            <div className="text-2xl font-semibold text-anza-green">
               {slotNumber ? slotNumber.toLocaleString() : "Not available"}
             </div>
           </div>
           <form className="flex flex-wrap items-end gap-3" method="get">
-            <label className="flex flex-col text-xs uppercase tracking-wide text-slate-400">
+            <label className="flex flex-col text-xs uppercase tracking-wide text-anza-green-muted">
               Slot number
               <input
                 type="number"
                 name="slot"
                 defaultValue={slotParam ?? slotNumber ?? ""}
                 placeholder="e.g. 377496174"
-                className="mt-1 w-44 rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-100 focus:border-slate-500 focus:outline-none"
+                className="mt-1 w-44 rounded border border-anza-border bg-white px-3 py-2 font-mono text-sm text-anza-green focus:border-anza-green focus:outline-none"
               />
             </label>
             <button
               type="submit"
-              className="rounded bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-white"
+              className="rounded bg-anza-green px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-anza-green-dark"
             >
               Load slot
             </button>
@@ -141,21 +141,21 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
           </p>
         )}
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-            <div className="text-xs text-slate-400">Entries observed</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
+          <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+            <div className="text-xs text-anza-green-muted">Entries observed</div>
+            <div className="mt-1 text-xl font-semibold text-anza-green">
               {detail?.entries.length.toLocaleString() ?? "—"}
             </div>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-            <div className="text-xs text-slate-400">Zero-tx entries (ticks)</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
+          <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+            <div className="text-xs text-anza-green-muted">Zero-tx entries (ticks)</div>
+            <div className="mt-1 text-xl font-semibold text-anza-green">
               {zeroEntryCount.toLocaleString()}
             </div>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-            <div className="text-xs text-slate-400">Avg tx per entry</div>
-            <div className="mt-1 text-xl font-semibold text-slate-50">
+          <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
+            <div className="text-xs text-anza-green-muted">Avg tx per entry</div>
+            <div className="mt-1 text-xl font-semibold text-anza-green">
               {avgTxPerEntry}
             </div>
           </div>
@@ -164,24 +164,24 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
 
       <GeyserEntryPlot entries={detail?.entries ?? []} slotNumber={slotNumber} />
 
-      <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-        <div className="flex items-center justify-between gap-4 border-b border-slate-800 px-4 py-3">
+      <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+        <div className="flex items-center justify-between gap-4 border-b border-anza-border px-4 py-3">
           <div>
-            <div className="text-sm font-semibold text-slate-100">Geyser entries table</div>
-            <p className="text-xs text-slate-400">
+            <div className="text-sm font-semibold text-anza-green">Geyser entries table</div>
+            <p className="text-xs text-anza-green-muted">
               Full list of entries for the slot; zero-tx entries are PoH ticks.
             </p>
           </div>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-anza-green-muted">
             Total entries: {entries.length.toLocaleString()}
           </div>
         </div>
         {entries.length === 0 ? (
-          <div className="p-4 text-sm text-slate-400">No entries to display.</div>
+          <div className="p-4 text-sm text-anza-green-muted">No entries to display.</div>
         ) : (
           <div className="max-h-[28rem] overflow-auto">
             <table className="w-full border-collapse text-left text-xs">
-              <thead className="sticky top-0 bg-slate-900/80 text-slate-400">
+              <thead className="sticky top-0 bg-anza-surface text-anza-green-muted">
                 <tr>
                   <th className="px-3 py-2">Entry idx</th>
                   <th className="px-3 py-2">Executed tx</th>
@@ -198,24 +198,24 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
                     const isTick = entry.executedTransactionCount === 0;
                     const timeIso = new Date(entry.time).toISOString();
                     return (
-                      <tr key={entry.index} className="border-t border-slate-800 text-slate-200">
+                      <tr key={entry.index} className="border-t border-anza-border text-anza-green">
                         <td className="px-3 py-2 font-mono text-[11px]">{entry.index}</td>
                         <td className="px-3 py-2 font-mono text-[11px]">
                           {entry.executedTransactionCount.toLocaleString()}
                         </td>
                         <td className="px-3 py-2">
                           {isTick ? (
-                            <span className="rounded-full bg-slate-800 px-2 py-1 text-[11px] text-slate-100">
+                            <span className="rounded-full bg-anza-surface-alt px-2 py-1 text-[11px] text-anza-green">
                               Yes
                             </span>
                           ) : (
-                            <span className="text-slate-500">No</span>
+                            <span className="text-anza-green-subtle">No</span>
                           )}
                         </td>
                         <td className="px-3 py-2 font-mono text-[11px]">
                           {typeof entry.numHashes === "number" ? entry.numHashes.toLocaleString() : "—"}
                         </td>
-                        <td className="px-3 py-2 font-mono text-[11px] text-slate-300">{timeIso}</td>
+                        <td className="px-3 py-2 font-mono text-[11px] text-anza-green-mid">{timeIso}</td>
                       </tr>
                     );
                   })}
@@ -226,48 +226,48 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-          <div className="mb-3 text-sm font-semibold text-slate-100">
+        <div className="rounded-lg border border-anza-border bg-anza-surface p-6">
+          <div className="mb-3 text-sm font-semibold text-anza-green">
             Data inputs
           </div>
-          <ul className="space-y-2 text-sm text-slate-300">
+          <ul className="space-y-2 text-sm text-anza-green-mid">
             <li>
-              <span className="font-semibold text-slate-100">Entries</span> from{" "}
-              <code className="rounded bg-slate-800 px-1 py-0.5">bam.geyser_entries</code>{" "}
+              <span className="font-semibold text-anza-green">Entries</span> from{" "}
+              <code className="rounded bg-anza-surface-alt px-1 py-0.5">bam.geyser_entries</code>{" "}
               with executed transaction counts and timestamps.
             </li>
             <li>
-              <span className="font-semibold text-slate-100">Transactions</span>{" "}
+              <span className="font-semibold text-anza-green">Transactions</span>{" "}
               from{" "}
-              <code className="rounded bg-slate-800 px-1 py-0.5">bam.geyser_transactions</code>{" "}
+              <code className="rounded bg-anza-surface-alt px-1 py-0.5">bam.geyser_transactions</code>{" "}
               including vote bits, CU used/requested, and fees.
             </li>
             <li>
-              <span className="font-semibold text-slate-100">Slot metadata</span>{" "}
+              <span className="font-semibold text-anza-green">Slot metadata</span>{" "}
               from{" "}
-              <code className="rounded bg-slate-800 px-1 py-0.5">bam.geyser_block_metadata</code>{" "}
+              <code className="rounded bg-anza-surface-alt px-1 py-0.5">bam.geyser_block_metadata</code>{" "}
               to identify the leader and align FirstShred timestamps.
             </li>
           </ul>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-        <div className="mb-3 text-sm font-semibold text-slate-100">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-6">
+        <div className="mb-3 text-sm font-semibold text-anza-green">
           Processing steps
           </div>
-          <ol className="space-y-2 text-sm text-slate-300">
+          <ol className="space-y-2 text-sm text-anza-green-mid">
             <li>
-              <span className="font-semibold text-slate-100">Map entries to ticks.</span>{" "}
+              <span className="font-semibold text-anza-green">Map entries to ticks.</span>{" "}
               Any entry with zero executed transactions is treated as a PoH tick.
               We drop dotted guides at those indices on the chart.
             </li>
             <li>
-              <span className="font-semibold text-slate-100">Accumulate transaction ranges.</span>{" "}
+              <span className="font-semibold text-anza-green">Accumulate transaction ranges.</span>{" "}
               Entry indices are used to build cumulative transaction offsets so
               each transaction can be tied back to the tick that preceded it.
             </li>
             <li>
-              <span className="font-semibold text-slate-100">Compute slot metrics.</span>{" "}
+              <span className="font-semibold text-anza-green">Compute slot metrics.</span>{" "}
               Slot time uses FirstShredReceived deltas; leader rewards sum fee
               share plus bundle tips; sequencing charts reuse the same entry ↔ tick map.
             </li>
@@ -275,36 +275,36 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-        <div className="mb-2 text-sm font-semibold text-slate-100">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-6">
+        <div className="mb-2 text-sm font-semibold text-anza-green">
           Slot duration methodology
         </div>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-anza-green-mid">
           For each slot, we compute duration as{" "}
-          <span className="font-mono text-xs text-slate-100">FirstShredReceived(slot) - FirstShredReceived(slot-1)</span>.
+          <span className="font-mono text-xs text-anza-green">FirstShredReceived(slot) - FirstShredReceived(slot-1)</span>.
           If either timestamp is missing, the duration is left blank. This keeps slot time grounded
           in the actual onset of block production rather than block completion or vote landing.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
-        <div className="flex items-center justify-between gap-4 border-b border-slate-800 px-4 py-3">
+      <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface">
+        <div className="flex items-center justify-between gap-4 border-b border-anza-border px-4 py-3">
           <div>
-            <div className="text-sm font-semibold text-slate-100">Last shred received (sample slot)</div>
-            <p className="text-xs text-slate-400">
+            <div className="text-sm font-semibold text-anza-green">Last shred received (sample slot)</div>
+            <p className="text-xs text-anza-green-muted">
               Pulls FirstShredReceived and LastShredReceived from the geyser slot status stream for the loaded slot.
             </p>
           </div>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-anza-green-muted">
             Slot: {slotNumber ? slotNumber.toLocaleString() : "—"}
           </div>
         </div>
         {!metadata ? (
-          <div className="p-4 text-sm text-slate-400">No slot metadata available.</div>
+          <div className="p-4 text-sm text-anza-green-muted">No slot metadata available.</div>
         ) : (
           <div className="overflow-auto">
             <table className="w-full border-collapse text-left text-xs">
-              <thead className="sticky top-0 bg-slate-900/80 text-slate-400">
+              <thead className="sticky top-0 bg-anza-surface text-anza-green-muted">
                 <tr>
                   <th className="px-3 py-2">Slot</th>
                   <th className="px-3 py-2">Validator identity</th>
@@ -319,7 +319,7 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
                   const lastMs = metadata.lastShredTime ? new Date(metadata.lastShredTime).getTime() : null;
                   const span = firstMs !== null && lastMs !== null ? Math.max(0, lastMs - firstMs) : null;
                   return (
-                    <tr className="border-t border-slate-800 text-slate-200">
+                    <tr className="border-t border-anza-border text-anza-green">
                       <td className="px-3 py-2 font-mono text-[11px]">
                         {metadata.slot.toLocaleString()}
                       </td>
@@ -344,11 +344,11 @@ export default async function MethodologyPage({ searchParams }: PageProps) {
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-        <div className="mb-2 text-sm font-semibold text-slate-100">
+      <div className="rounded-lg border border-anza-border bg-anza-surface p-6">
+        <div className="mb-2 text-sm font-semibold text-anza-green">
           How to read the entry plot
         </div>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-anza-green-mid">
           The x-axis is the geyser entry index for the slot. Blue bars show how
           many executed transactions landed in each entry. Vertical dotted
           strokes mark PoH tick entries (zero transactions) that pace leader

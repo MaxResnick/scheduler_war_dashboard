@@ -56,15 +56,15 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
   const yTicks = [0, 0.25, 0.5, 0.75, 1];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+    <div className="overflow-hidden rounded-xl border border-anza-border bg-anza-surface p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-slate-50">Geyser Entries Trace</h3>
-          <p className="text-sm text-slate-400">
+          <h3 className="text-lg font-semibold text-anza-green">Geyser Entries Trace</h3>
+          <p className="text-sm text-anza-green-muted">
             Bars show executed transactions per entry; dotted lines mark PoH tick entries with zero transactions.
           </p>
         </div>
-        <div className="text-right text-xs text-slate-400">
+        <div className="text-right text-xs text-anza-green-muted">
           <div>Slot: {slotNumber ?? "—"}</div>
           <div className="mt-1">
             Entries: {entries.length.toLocaleString()} · Zero-tx entries: {zeroIndices.length.toLocaleString()}
@@ -73,7 +73,7 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
       </div>
 
       {!hasData ? (
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 p-6 text-sm text-slate-400">
+        <div className="rounded-lg border border-dashed border-anza-border bg-anza-surface p-6 text-sm text-anza-green-muted">
           No geyser entries available for this slot.
         </div>
       ) : (
@@ -161,7 +161,7 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
                     x={x}
                     y={plotHeight + 22}
                     textAnchor="middle"
-                    className="fill-slate-400 text-xs"
+                    className="fill-anza-green-muted text-xs"
                   >
                     {tick}
                   </text>
@@ -172,7 +172,7 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
               x={plotWidth / 2}
               y={plotHeight + 42}
               textAnchor="middle"
-              className="fill-slate-300 text-sm"
+              className="fill-anza-green-mid text-sm"
             >
               Entry index (geyser)
             </text>
@@ -192,7 +192,7 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
               return (
                 <g key={`yt-${f}`}>
                   <line x1={-6} y1={y} x2={0} y2={y} stroke="rgb(148,163,184)" />
-                  <text x={-10} y={y + 4} textAnchor="end" className="fill-slate-400 text-xs">
+                  <text x={-10} y={y + 4} textAnchor="end" className="fill-anza-green-muted text-xs">
                     {label}
                   </text>
                 </g>
@@ -203,7 +203,7 @@ export default function GeyserEntryPlot({ entries, slotNumber }: Props) {
               y={-34}
               textAnchor="middle"
               transform={`rotate(-90, ${-plotHeight / 2}, -34)`}
-              className="fill-slate-300 text-sm"
+              className="fill-anza-green-mid text-sm"
             >
               Executed transactions
             </text>

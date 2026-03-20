@@ -107,20 +107,20 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
   };
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+    <div className="rounded-lg border border-anza-border bg-anza-surface p-4">
       <h2 className="text-lg font-semibold mb-2">Export Validator Lists</h2>
       <div className="flex items-center gap-4 mb-4">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-anza-green-muted">
           Click a scheduler type to {format === "json" ? "copy as JSON" : "download CSV"}
         </p>
-        <div className="flex items-center gap-1 rounded-md border border-slate-700 p-0.5">
+        <div className="flex items-center gap-1 rounded-md border border-anza-border p-0.5">
           <button
             type="button"
             onClick={() => setFormat("json")}
             className={`px-2 py-1 text-xs rounded ${
               format === "json"
-                ? "bg-sky-500 text-slate-900"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-anza-green text-white"
+                : "text-anza-green-muted hover:text-anza-green"
             }`}
           >
             JSON
@@ -130,8 +130,8 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
             onClick={() => setFormat("csv")}
             className={`px-2 py-1 text-xs rounded ${
               format === "csv"
-                ? "bg-sky-500 text-slate-900"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-anza-green text-white"
+                : "text-anza-green-muted hover:text-anza-green"
             }`}
           >
             CSV
@@ -142,12 +142,12 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
         <button
           type="button"
           onClick={() => exportData("all", validators)}
-          className="flex items-center gap-2 rounded-md border border-sky-500 px-3 py-2 text-sm text-sky-500 transition hover:bg-slate-800"
+          className="flex items-center gap-2 rounded-md border border-anza-green px-3 py-2 text-sm text-anza-green transition hover:bg-anza-surface-alt"
         >
           <span>All Validators</span>
-          <span className="text-slate-500">({validators.length})</span>
+          <span className="text-anza-green-subtle">({validators.length})</span>
           {copied === "all" && (
-            <span className="text-green-400 text-xs">✓ {format === "json" ? "Copied" : "Downloaded"}</span>
+            <span className="text-anza-green-mid text-xs">✓ {format === "json" ? "Copied" : "Downloaded"}</span>
           )}
         </button>
         {sortedTypes.map(({ type, validators: list }) => (
@@ -155,7 +155,7 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
             key={type}
             type="button"
             onClick={() => exportData(type, list)}
-            className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:bg-slate-800"
+            className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:bg-anza-surface-alt"
             style={{
               borderColor: SCHEDULER_COLORS[type] ?? "#64748b",
               color: SCHEDULER_COLORS[type] ?? "#64748b",
@@ -166,9 +166,9 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
               style={{ backgroundColor: SCHEDULER_COLORS[type] ?? "#64748b" }}
             />
             <span>{SCHEDULER_LABELS[type] ?? type}</span>
-            <span className="text-slate-500">({list.length})</span>
+            <span className="text-anza-green-subtle">({list.length})</span>
             {copied === type && (
-              <span className="text-green-400 text-xs">✓ {format === "json" ? "Copied" : "Downloaded"}</span>
+              <span className="text-anza-green-mid text-xs">✓ {format === "json" ? "Copied" : "Downloaded"}</span>
             )}
           </button>
         ))}
