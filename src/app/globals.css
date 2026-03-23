@@ -13,6 +13,7 @@
   --anza-green-mid: 59 80 0;        /* #3b5000 */
   --anza-green-muted: 94 114 0;     /* #5e7200 */
   --anza-green-subtle: 143 160 80;  /* #8fa050 */
+  --chart-plot-opacity: 1;
 }
 
 /* ── Dark theme ── */
@@ -26,6 +27,7 @@
   --anza-green-mid: 210 205 190;    /* secondary text */
   --anza-green-muted: 160 155 120;  /* muted text */
   --anza-green-subtle: 110 108 76;  /* subtle text */
+  --chart-plot-opacity: 0.75;
 }
 
 body {

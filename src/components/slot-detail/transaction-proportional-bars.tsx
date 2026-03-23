@@ -164,7 +164,7 @@ export default function TransactionProportionalBars({
               width={Math.max(0, w)}
               height={barHeight}
               fill={color}
-              opacity={0.75}
+              style={{ opacity: 'var(--chart-plot-opacity)' }}
             />
           );
           const ix = x + w / 2;

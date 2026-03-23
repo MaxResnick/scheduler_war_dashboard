@@ -201,7 +201,7 @@ export default function TransactionSequencingTimeline({
                       width={w}
                       height={h}
                       fill={panel.color.fill}
-                      opacity={0.75}
+                      style={{ opacity: 'var(--chart-plot-opacity)' }}
                     />
                   );
                 })}

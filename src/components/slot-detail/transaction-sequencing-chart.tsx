@@ -153,7 +153,7 @@ export default function TransactionSequencingChart({
               fill="none"
               stroke="#bfdbfe"
               strokeWidth={3}
-              opacity={0.75}
+              style={{ opacity: 'var(--chart-plot-opacity)' }}
             />
           )}
 
@@ -170,7 +170,7 @@ export default function TransactionSequencingChart({
               fill="none"
               stroke="#fecaca"
               strokeWidth={3}
-              opacity={0.75}
+              style={{ opacity: 'var(--chart-plot-opacity)' }}
             />
           )}
 
@@ -187,7 +187,7 @@ export default function TransactionSequencingChart({
               fill="none"
               stroke="#bbf7d0"
               strokeWidth={3}
-              opacity={0.75}
+              style={{ opacity: 'var(--chart-plot-opacity)' }}
             />
           )}
 
