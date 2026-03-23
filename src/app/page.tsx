@@ -1,6 +1,6 @@
-import SchedulerTreemap from "@/components/scheduler-treemap";
-import ValidatorListExport from "@/components/validator-list-export";
+import NetworkTreemapToggle from "@/components/network-treemap-toggle";
 import { schedulerApiGet } from "@/lib/backend-api";
+import { loadEthStakers } from "@/lib/eth-stakers";
 import Link from "next/link";
 
 export default async function HomePage() {
@@ -12,6 +12,8 @@ export default async function HomePage() {
       softwareClient: string;
     }>;
   }>("/validators", { includeStake: "true" });
+
+  const ethStakers = loadEthStakers();
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
@@ -48,9 +50,7 @@ export default async function HomePage() {
         </p>
       </header>
 
-      <SchedulerTreemap validators={validators} />
-
-      <ValidatorListExport validators={validators} />
+      <NetworkTreemapToggle solanaValidators={validators} ethStakers={ethStakers} />
     </div>
   );
 }
