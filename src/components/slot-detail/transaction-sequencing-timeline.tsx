@@ -130,9 +130,36 @@ export default function TransactionSequencingTimeline({
   const plotWidth = chartWidth - padding.left - padding.right;
 
   const panels = [
-    { key: "vote", label: "Vote", color: { point: "#15803d", fill: "#bbf7d0" }, data: groups.vote, hist: voteHist },
-    { key: "jito", label: "Jito Bundle", color: { point: "#dc2626", fill: "#fecaca" }, data: groups.jito, hist: jitoHist },
-    { key: "regular", label: "Regular (non-vote)", color: { point: "#2563eb", fill: "#bfdbfe" }, data: groups.regular, hist: regHist }
+    {
+      key: "vote",
+      label: "Vote",
+      color: {
+        point: "rgb(var(--timeline-vote-stroke))",
+        fill: "rgb(var(--timeline-vote-fill))"
+      },
+      data: groups.vote,
+      hist: voteHist
+    },
+    {
+      key: "jito",
+      label: "Jito Bundle",
+      color: {
+        point: "rgb(var(--timeline-jito-stroke))",
+        fill: "rgb(var(--timeline-jito-fill))"
+      },
+      data: groups.jito,
+      hist: jitoHist
+    },
+    {
+      key: "regular",
+      label: "Regular (non-vote)",
+      color: {
+        point: "rgb(var(--timeline-regular-stroke))",
+        fill: "rgb(var(--timeline-regular-fill))"
+      },
+      data: groups.regular,
+      hist: regHist
+    }
   ] as const;
 
   function tickToX(tick: number) {
@@ -201,7 +228,7 @@ export default function TransactionSequencingTimeline({
                       width={w}
                       height={h}
                       fill={panel.color.fill}
-                      style={{ opacity: 'var(--chart-plot-opacity)' }}
+                      opacity={0.75}
                     />
                   );
                 })}

@@ -103,6 +103,11 @@ export default function TransactionSequencingChart({
   }, [cumulativeData]);
 
   const maxTickValue = maxTick;
+  const lineColors = {
+    vote: "rgb(var(--timeline-vote-fill))",
+    jito: "rgb(var(--timeline-jito-fill))",
+    regular: "rgb(var(--timeline-regular-fill))"
+  } as const;
 
   return (
     <div className="overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
@@ -140,7 +145,7 @@ export default function TransactionSequencingChart({
             );
           })}
 
-          {/* Regular line (blue pastel) */}
+          {/* Regular line */}
           {cumulativeData.length > 1 && (
             <polyline
               points={cumulativeData
@@ -151,13 +156,13 @@ export default function TransactionSequencingChart({
                 })
                 .join(" ")}
               fill="none"
-              stroke="#bfdbfe"
+              stroke={lineColors.regular}
               strokeWidth={3}
-              style={{ opacity: 'var(--chart-plot-opacity)' }}
+              opacity={0.9}
             />
           )}
 
-          {/* Jito line (red pastel) */}
+          {/* Jito line */}
           {cumulativeData.length > 1 && (
             <polyline
               points={cumulativeData
@@ -168,13 +173,13 @@ export default function TransactionSequencingChart({
                 })
                 .join(" ")}
               fill="none"
-              stroke="#fecaca"
+              stroke={lineColors.jito}
               strokeWidth={3}
-              style={{ opacity: 'var(--chart-plot-opacity)' }}
+              opacity={0.9}
             />
           )}
 
-          {/* Votes line (green pastel) */}
+          {/* Votes line */}
           {cumulativeData.length > 1 && (
             <polyline
               points={cumulativeData
@@ -185,9 +190,9 @@ export default function TransactionSequencingChart({
                 })
                 .join(" ")}
               fill="none"
-              stroke="#bbf7d0"
+              stroke={lineColors.vote}
               strokeWidth={3}
-              style={{ opacity: 'var(--chart-plot-opacity)' }}
+              opacity={0.9}
             />
           )}
 
@@ -279,15 +284,15 @@ export default function TransactionSequencingChart({
       {/* Legend */}
       <div className="mt-4 flex items-center gap-6 text-xs text-anza-green-muted">
         <div className="flex items-center gap-2">
-          <div className="h-0.5 w-6" style={{ backgroundColor: '#bbf7d0' }} />
+          <div className="h-0.5 w-6" style={{ backgroundColor: lineColors.vote }} />
           <span>Votes (cumulative)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-0.5 w-6" style={{ backgroundColor: '#fecaca' }} />
+          <div className="h-0.5 w-6" style={{ backgroundColor: lineColors.jito }} />
           <span>Jito bundle (cumulative)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-0.5 w-6" style={{ backgroundColor: '#bfdbfe' }} />
+          <div className="h-0.5 w-6" style={{ backgroundColor: lineColors.regular }} />
           <span>Regular (non-vote) (cumulative)</span>
         </div>
       </div>

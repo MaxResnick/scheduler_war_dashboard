@@ -13,7 +13,12 @@
   --anza-green-mid: 59 80 0;        /* #3b5000 */
   --anza-green-muted: 94 114 0;     /* #5e7200 */
   --anza-green-subtle: 143 160 80;  /* #8fa050 */
-  --chart-plot-opacity: 1;
+  --timeline-vote-fill: 74 222 128;      /* deeper green for light mode */
+  --timeline-jito-fill: 248 113 113;     /* deeper red for light mode */
+  --timeline-regular-fill: 96 165 250;   /* deeper blue for light mode */
+  --timeline-vote-stroke: 21 128 61;
+  --timeline-jito-stroke: 220 38 38;
+  --timeline-regular-stroke: 37 99 235;
 }
 
 /* ── Dark theme ── */
@@ -27,7 +32,12 @@
   --anza-green-mid: 210 205 190;    /* secondary text */
   --anza-green-muted: 160 155 120;  /* muted text */
   --anza-green-subtle: 110 108 76;  /* subtle text */
-  --chart-plot-opacity: 0.75;
+  --timeline-vote-fill: 34 197 94;
+  --timeline-jito-fill: 248 113 113;
+  --timeline-regular-fill: 96 165 250;
+  --timeline-vote-stroke: 187 247 208;
+  --timeline-jito-stroke: 254 202 202;
+  --timeline-regular-stroke: 191 219 254;
 }
 
 body {

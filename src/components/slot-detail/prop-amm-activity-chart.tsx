@@ -20,14 +20,14 @@ type Props = {
 };
 
 const DEFAULT_COLORS = [
-  "#38bdf8",
-  "#f472b6",
-  "#facc15",
-  "#a78bfa",
-  "#34d399",
-  "#fb7185",
-  "#f97316",
-  "#c084fc"
+  "#0284c7",
+  "#db2777",
+  "#ca8a04",
+  "#7c3aed",
+  "#059669",
+  "#e11d48",
+  "#c2410c",
+  "#9333ea"
 ];
 
 const SCHEDULER_COLORS: Record<string, string> = {

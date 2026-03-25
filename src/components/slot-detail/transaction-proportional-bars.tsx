@@ -107,7 +107,7 @@ export default function TransactionProportionalBars({
   // Solid colors (non-pastel) for stronger contrast
   const jitoColor = "#5F288D"; // jito purple
   const nonJitoColor = "#60a5fa"; // blue-400
-  const feeSpoofColor = "#F5F2EB"; // harmonic cream
+  const feeSpoofColor = "#d97706"; // amber for clearer contrast
 
   function renderPanel(
     yOffset: number,
@@ -164,7 +164,7 @@ export default function TransactionProportionalBars({
               width={Math.max(0, w)}
               height={barHeight}
               fill={color}
-              style={{ opacity: 'var(--chart-plot-opacity)' }}
+              opacity={0.75}
             />
           );
           const ix = x + w / 2;
@@ -194,7 +194,7 @@ export default function TransactionProportionalBars({
       <div className="mt-2 flex items-center gap-6 text-xs text-anza-green-muted">
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: jitoColor}}></span>Jito bundle</div>
         <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: nonJitoColor}}></span>Regular transactions</div>
-        <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: feeSpoofColor}}></span>Temporal controlled fee payer</div>
+        <div className="flex items-center gap-2"><span className="inline-block h-2 w-4 rounded-sm" style={{backgroundColor: feeSpoofColor}}></span>Temporal Controlled Fee Payer</div>
       </div>
     </div>
   );
