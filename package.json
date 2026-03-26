@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eth-stakers:update": "python3 scripts/update_eth_stakers.py"
   },
   "dependencies": {
     "next": "^14.2.33",

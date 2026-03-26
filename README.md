@@ -99,6 +99,44 @@ The `/methodology` page shows an interactive chart plotting entry indices (x-axi
 - Slot status distribution and block metadata snapshot highlight scheduler health
 - Slot detail view with transaction sequencing charts and prop AMM analysis
 
+## Ethereum stakers ETL
+
+The repository includes a standalone Python loader at [`scripts/update_eth_stakers.py`](./scripts/update_eth_stakers.py) for refreshing Ethereum staking entity snapshots from Dune into ClickHouse.
+
+Expected flow:
+
+1. Create a saved Dune query that returns the same columns as [`ETH_Stakers.csv`](./ETH_Stakers.csv).
+2. Set `DUNE_API_KEY`, `DUNE_QUERY_ID`, and your ClickHouse credentials in `.env`.
+3. Optionally create the destination table:
+   ```bash
+   python3 scripts/update_eth_stakers.py --create-table
+   ```
+4. Smoke test the Dune result without inserting:
+   ```bash
+   python3 scripts/update_eth_stakers.py --dry-run
+   ```
+5. Run the loader:
+   ```bash
+   python3 scripts/update_eth_stakers.py
+   # or
+   npm run eth-stakers:update
+   ```
+
+The script:
+
+- executes the saved Dune query
+- polls for completion
+- normalizes the rows into a snapshot schema
+- inserts them into ClickHouse over HTTP
+
+The ClickHouse schema lives in [`sql/eth_stakers_snapshots.sql`](./sql/eth_stakers_snapshots.sql) and is also embedded in the script for `--create-table`.
+
+Example cron entry:
+
+```cron
+15 3 * * * cd /path/to/scheduler_war_dashboard && /usr/bin/python3 scripts/update_eth_stakers.py >> /var/log/eth_stakers_etl.log 2>&1
+```
+
 ## License
 
 MIT
