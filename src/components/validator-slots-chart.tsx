@@ -46,21 +46,36 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
   const [selectedValidator, setSelectedValidator] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [hoveredValidator, setHoveredValidator] = useState<string | null>(null);
+  const [loadingValidator, setLoadingValidator] = useState<string | null>(null);
   const router = useRouter();
 
   const handleBarClick = async (address: string) => {
+    if (loadingValidator) return;
+    setLoadingValidator(address);
+    let didNavigate = false;
+
     try {
       const res = await fetch(`/api/validator-slots/${address}`);
       if (!res.ok) throw new Error("Failed to fetch slots");
       const data = await res.json();
       const slots = data.slots as { slot: number }[];
       if (slots.length > 4) {
+        didNavigate = true;
         router.push(`/slot/${slots[4].slot}`);
       } else if (slots.length > 0) {
+        didNavigate = true;
         router.push(`/slot/${slots[0].slot}`);
+      } else {
+        didNavigate = true;
+        router.push("/slot");
       }
     } catch {
-      // Fallback: do nothing on error
+      didNavigate = true;
+      router.push("/slot");
+    } finally {
+      if (!didNavigate) {
+        setLoadingValidator(null);
+      }
     }
   };
 
@@ -307,7 +322,12 @@ export default function ValidatorSlotsChart({ validators, validatorNames, valida
         </div>
 
         {/* Chart */}
-        <div className="flex-1 overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
+        <div className="relative flex-1 overflow-hidden rounded-lg border border-anza-border bg-anza-surface p-6">
+          {loadingValidator && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-anza-bg/20">
+              <span className="h-12 w-12 animate-spin rounded-full border-[3px] border-anza-green/85 border-t-transparent" />
+            </div>
+          )}
           <svg width="100%" height={chartHeight} className="overflow-visible">
             {validators.map((validator, index) => {
               const widthPercent = (validator.avg_slot_time_ms / maxSlotTime) * 100;
