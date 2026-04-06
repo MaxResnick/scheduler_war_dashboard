@@ -58,6 +58,7 @@ const HARMONIC_VARIANTS = new Set([
 const FRANKENDANCER_VARIANTS = new Set([
   "Frankendancer",
   "Frankendancer Rev",
+  "Frankendancer Vanilla"
 ]);
 
 function getCanonicalGroup(softwareClient: string): string {
