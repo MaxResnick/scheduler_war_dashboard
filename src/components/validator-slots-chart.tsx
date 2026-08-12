@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 
 type ValidatorData = {
   validator_address: string;
@@ -32,7 +33,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
 
 function getDisplayName(softwareClient: string): string {
   if (softwareClient === "JitoLabs") return "Jito Agave";
-  return softwareClient;
+  return formatSoftwareClientLabel(softwareClient);
 }
 
 function getSchedulerColor(softwareClient: string | undefined): string {

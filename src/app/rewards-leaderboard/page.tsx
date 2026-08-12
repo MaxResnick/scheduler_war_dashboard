@@ -1,4 +1,5 @@
 import { schedulerApiGet } from "@/lib/backend-api";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 import Link from "next/link";
 
 type LeaderboardEntry = {
@@ -242,7 +243,9 @@ export default async function RewardsLeaderboardPage({ searchParams }: PageProps
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-anza-green-mid">{entry.softwareClient}</td>
+                      <td className="px-4 py-3 text-anza-green-mid">
+                        {formatSoftwareClientLabel(entry.softwareClient)}
+                      </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatSol(entry.totalValidatorRewardSol)} SOL
                       </td>

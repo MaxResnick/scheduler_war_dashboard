@@ -2,6 +2,10 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  formatSoftwareClientLabel,
+  getHarmonicClientFamily,
+} from "@/lib/software-client";
 import type { ValidatorData } from "@/lib/types";
 
 type Props = {
@@ -46,14 +50,6 @@ const SCHEDULER_COLORS: Record<string, string> = {
   "Unknown": "#64748b",
 };
 
-// Sub-clients that belong to the Harmonic super-group
-const HARMONIC_VARIANTS = new Set([
-  "Harmonic",
-  "HarmonicAgave",
-  "HarmonicFrankendancer",
-  "HarmonicFiredancer",
-]);
-
 // Sub-clients that belong to the Frankendancer super-group
 const FRANKENDANCER_VARIANTS = new Set([
   "Frankendancer",
@@ -62,7 +58,7 @@ const FRANKENDANCER_VARIANTS = new Set([
 ]);
 
 function getCanonicalGroup(softwareClient: string): string {
-  if (HARMONIC_VARIANTS.has(softwareClient)) return "Harmonic";
+  if (getHarmonicClientFamily(softwareClient)) return "Harmonic";
   if (FRANKENDANCER_VARIANTS.has(softwareClient)) return "Frankendancer";
   return softwareClient;
 }
@@ -70,11 +66,15 @@ function getCanonicalGroup(softwareClient: string): string {
 // Rename labels for display
 function getDisplayName(softwareClient: string): string {
   if (softwareClient === "JitoLabs") return "Jito Agave";
-  return softwareClient;
+  return formatSoftwareClientLabel(softwareClient);
 }
 
 function getColor(softwareClient: string): string {
-  return SCHEDULER_COLORS[softwareClient] ?? SCHEDULER_COLORS[getDisplayName(softwareClient)] ?? "#64748b";
+  const harmonicFamily = getHarmonicClientFamily(softwareClient);
+  return SCHEDULER_COLORS[softwareClient]
+    ?? (harmonicFamily ? SCHEDULER_COLORS[harmonicFamily] : undefined)
+    ?? SCHEDULER_COLORS[getDisplayName(softwareClient)]
+    ?? "#64748b";
 }
 
 // Simple squarified treemap layout

@@ -1,5 +1,6 @@
 import type { SlotDetail } from "@/lib/types";
 import { schedulerApiGet } from "@/lib/backend-api";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 import Link from "next/link";
 import SlotSearch from "@/components/slot-detail/slot-search";
 import TransactionSequencingChart from "@/components/slot-detail/transaction-sequencing-chart";
@@ -28,7 +29,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
 function getClientDisplayName(softwareClient: string): string {
   if (softwareClient === "JitoLabs") return "Jito Agave";
   if (softwareClient === "AgaveBam") return "BAM";
-  return softwareClient;
+  return formatSoftwareClientLabel(softwareClient);
 }
 
 function getClientColor(softwareClient: string): string {

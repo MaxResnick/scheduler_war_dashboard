@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { SlotTransaction } from "@/lib/types";
 import { PROP_AMM_ACCOUNTS } from "@/lib/prop-amm";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 
 type Props = {
   transactions: SlotTransaction[];
@@ -47,7 +48,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
 function getClientDisplayName(softwareClient: string): string {
   if (softwareClient === "JitoLabs") return "Jito Agave";
   if (softwareClient === "AgaveBam") return "BAM";
-  return softwareClient;
+  return formatSoftwareClientLabel(softwareClient);
 }
 
 function getClientColor(softwareClient: string): string {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 import type { ValidatorData } from "@/lib/types";
 
 type ExportFormat = "json" | "csv";
@@ -165,7 +166,7 @@ export default function ValidatorListExport({ validators }: ValidatorListExportP
               className="w-3 h-3 rounded"
               style={{ backgroundColor: SCHEDULER_COLORS[type] ?? "#64748b" }}
             />
-            <span>{SCHEDULER_LABELS[type] ?? type}</span>
+            <span>{SCHEDULER_LABELS[type] ?? formatSoftwareClientLabel(type)}</span>
             <span className="text-anza-green-subtle">({list.length})</span>
             {copied === type && (
               <span className="text-anza-green-mid text-xs">✓ {format === "json" ? "Copied" : "Downloaded"}</span>

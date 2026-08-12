@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { formatSoftwareClientLabel } from "@/lib/software-client";
 import type { SlotEntry, SlotTransaction } from "@/lib/types";
 
 type Props = {
@@ -31,7 +32,7 @@ const SCHEDULER_COLORS: Record<string, string> = {
 function getClientDisplayName(softwareClient: string): string {
   if (softwareClient === "JitoLabs") return "Jito Agave";
   if (softwareClient === "AgaveBam") return "BAM";
-  return softwareClient;
+  return formatSoftwareClientLabel(softwareClient);
 }
 
 function getClientColor(softwareClient: string): string {
